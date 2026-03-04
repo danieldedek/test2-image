@@ -1,1 +1,7 @@
-Flask==3.0.3
+flask
+gunicorn
+faster-whisper
+torch
+torchvision
+torchaudio
+nemo_toolkit[asr]
