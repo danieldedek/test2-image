@@ -63,7 +63,7 @@ def index():
                 name = secure_filename(request.form.get("audio_file", "").strip())
 
                 if not name:
-                    raise ValueError("No file selected")
+                    raise ValueError(f"No file selected. Upload folder: {app.config['UPLOAD_FOLDER']}")
 
                 wav_path = os.path.join(app.config["UPLOAD_FOLDER"], name)
 
