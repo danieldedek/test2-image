@@ -1,30 +1,13 @@
-from flask import Flask, render_template, request, send_file, send_from_directory
+from flask import Flask, render_template, request, send_from_directory, send_file
 from utils import create_asr_engine
 from io import BytesIO
 from werkzeug.utils import secure_filename
 import os
-import subprocess
-import uuid
 
 app = Flask(__name__)
 UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
-
-
-def convert_webm_to_wav(webm_path, wav_path):
-    subprocess.run(
-        [
-            "ffmpeg", "-y",
-            "-i", webm_path,
-            "-ac", "1",
-            "-ar", "16000",
-            wav_path
-        ],
-        check=True,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL
-    )
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -40,38 +23,18 @@ def index():
         engine_name = request.form.get("engine")
 
         try:
-            if "audio_blob" in request.files and request.files["audio_blob"].filename:
-                webm = request.files["audio_blob"]
+            name = secure_filename(request.form.get("audio_file", "").strip())
 
-                custom_name = secure_filename(request.form.get("recording_name", "").strip())
+            if not name:
+                raise ValueError("No file selected")
 
-                if custom_name:
-                    base_name = custom_name
-                else:
-                    base_name = uuid.uuid4().hex
+            wav_path = os.path.join(app.config["UPLOAD_FOLDER"], name)
 
-                webm_path = os.path.join(app.config["UPLOAD_FOLDER"], f"{base_name}.webm")
-                wav_path = os.path.join(app.config["UPLOAD_FOLDER"], f"{base_name}.wav")
+            if not os.path.exists(wav_path):
+                raise ValueError("File does not exist")
 
-                webm.save(webm_path)
-                convert_webm_to_wav(webm_path, wav_path)
-
-                audio_file = wav_path
-                audio_filename = os.path.basename(wav_path)
-
-            else:
-                name = secure_filename(request.form.get("audio_file", "").strip())
-
-                if not name:
-                    raise ValueError("No file selected")
-
-                wav_path = os.path.join(app.config["UPLOAD_FOLDER"], name)
-
-                if not os.path.exists(wav_path):
-                    raise ValueError("File does not exist")
-
-                audio_file = wav_path
-                audio_filename = name
+            audio_file = wav_path
+            audio_filename = name
 
             asr = create_asr_engine(engine_name)
             asr.download()
@@ -93,7 +56,7 @@ def index():
 
 @app.route("/uploads/<path:filename>")
 def uploaded_file(filename):
-    return send_from_directory(app.config["UPLOAD_FOLDER"], filename)
+    return send_from_directory(app.config["UPLOAD_FOLDER"], filename, mimetype="audio/wav")
 
 
 @app.route("/download", methods=["POST"])
