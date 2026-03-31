@@ -20,24 +20,12 @@
 <body>
     <h2>Transcription</h2>
 
-    <form method="POST" enctype="multipart/form-data">
+    <form method="POST">
 
         <label>Existing WAV file (in uploads/):</label>
         <input type="text" name="audio_file" placeholder="example.wav">
 
-        <hr>
-
-        <h3>Recording</h3>
-
-        <label>New WAV file name:</label>
-        <input type="text" name="recording_name" placeholder="new_file">
-
         <br><br>
-
-        <button type="button" id="record-btn">Start recording</button>
-        <input type="file" id="audio_blob" name="audio_blob" hidden>
-
-        <hr>
 
         <label>Model:</label>
         <select name="engine">
@@ -72,40 +60,6 @@
     {% if error %}
     <p style="color:red">{{ error }}</p>
     {% endif %}
-
-    <script>
-        let recorder;
-        let stream;
-        let chunks = [];
-
-        const btn = document.getElementById("record-btn");
-        const input = document.getElementById("audio_blob");
-
-        btn.onclick = async () => {
-            if (!recorder || recorder.state === "inactive") {
-                stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                recorder = new MediaRecorder(stream);
-                chunks = [];
-
-                recorder.ondataavailable = e => chunks.push(e.data);
-                recorder.onstop = () => {
-                    const blob = new Blob(chunks, { type: "audio/webm" });
-                    const file = new File([blob], "recording.webm");
-
-                    const dt = new DataTransfer();
-                    dt.items.add(file);
-                    input.files = dt.files;
-                };
-
-                recorder.start();
-                btn.textContent = "Stop recording";
-            } else {
-                recorder.stop();
-                stream.getTracks().forEach(t => t.stop());
-                btn.textContent = "Start recording";
-            }
-        };
-    </script>
 
 </body>
 
