@@ -7,7 +7,7 @@ import subprocess
 import uuid
 
 app = Flask(__name__)
-UPLOAD_FOLDER = "/app/uploads"
+UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
@@ -63,7 +63,7 @@ def index():
                 name = secure_filename(request.form.get("audio_file", "").strip())
 
                 if not name:
-                    raise ValueError(f"No file selected. Upload folder: {app.config['UPLOAD_FOLDER']}")
+                    raise ValueError("No file selected")
 
                 wav_path = os.path.join(app.config["UPLOAD_FOLDER"], name)
 
