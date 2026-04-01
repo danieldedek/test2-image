@@ -56,7 +56,16 @@ def index():
 
 @app.route("/uploads/<path:filename>")
 def uploaded_file(filename):
-    return send_from_directory(app.config["UPLOAD_FOLDER"], filename, mimetype="audio/wav")
+    file_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+
+    if not os.path.exists(file_path):
+        return f"File not found: {file_path}", 404
+
+    return send_from_directory(
+        app.config["UPLOAD_FOLDER"],
+        filename,
+        mimetype="audio/wav"
+    )
 
 
 @app.route("/download", methods=["POST"])
