@@ -3,7 +3,7 @@ from parakeet import Parakeet
 from canary import Canary
 
 
-def create_asr_engine(engine_name: str, device: str = "cpu", **kwargs):
+def create_asr_engine(engine_name: str, device: str = "cpu"):
     engines = {
         "whisper": Whisper,
         "parakeet": Parakeet,
@@ -13,4 +13,4 @@ def create_asr_engine(engine_name: str, device: str = "cpu", **kwargs):
     if engine_name not in engines:
         raise ValueError(f"Unknown ASR engine: {engine_name}")
 
-    return engines[engine_name](device=device, **kwargs)
+    return engines[engine_name](device=device)
