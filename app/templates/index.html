@@ -1,66 +1,92 @@
 <!DOCTYPE html>
 <html lang="cs">
-
 <head>
     <meta charset="UTF-8">
     <title>ASR Demo</title>
     <style>
-        body {
-            font-family: Arial;
-            margin: 40px;
-        }
-
-        textarea {
-            width: 100%;
-            height: 200px;
-        }
+        body { font-family: Arial; margin: 40px; }
+        textarea { width: 100%; height: 200px; }
+        form > div { margin-bottom: 15px; }
     </style>
 </head>
-
 <body>
-    <h2>Transcription</h2>
 
-    <form method="POST">
+<h2>Transcription</h2>
 
+<form method="POST" enctype="multipart/form-data">
+
+    <div>
         <label>Existing WAV file (in uploads/):</label>
         <input type="text" name="audio_file" placeholder="example.wav">
+    </div>
 
-        <br><br>
-
-        <label>Model:</label>
+    <div>
+        <h3>Model</h3>
         <select name="engine">
             <option value="canary">canary</option>
             <option value="parakeet">parakeet</option>
             <option value="whisper">whisper</option>
         </select>
+    </div>
 
-        <br><br>
+    <div>
+        <h3>Options</h3>
+        <label>Language:</label>
+        <input type="text" name="language" placeholder="cs/en">
+        <label>Device:</label>
+        <select name="device">
+            <option value="cpu">CPU</option>
+            <option value="cuda">GPU</option>
+        </select>
+        <br>
+        <label><input type="checkbox" name="timestamps"> Timestamps</label>
+        <label><input type="checkbox" name="confidence"> Confidence</label>
+        <label><input type="checkbox" name="verbose"> Verbose</label>
+    </div>
 
-        <button type="submit" name="action" value="transcribe">Transcribe</button>
+    <div>
+        <button type="submit">Transcribe</button>
         <button type="submit" name="action" value="clear">Clear</button>
-    </form>
+    </div>
 
-    {% if audio_filename %}
+</form>
+
+{% if audio_filename %}
+<div>
     <h3>Play audio</h3>
     <audio controls>
-        <source src="{{ url_for('uploaded_file', filename=audio_filename) }}" type="audio/wav">
-        Your browser does not support the audio element.
+        <source src="{{ url_for('uploaded_file', filename=audio_filename) }}">
     </audio>
-    {% endif %}
+</div>
+{% endif %}
 
-    {% if transcript %}
-    <h3>Transcription</h3>
+{% if transcript %}
+<div>
+    <h3>Transcript</h3>
     <textarea readonly>{{ transcript }}</textarea>
     <form method="POST" action="/download">
         <input type="hidden" name="transcript" value="{{ transcript }}">
-        <button type="submit">Download TXT</button>
+        <button>Download</button>
     </form>
-    {% endif %}
+</div>
+{% endif %}
 
-    {% if error %}
-    <p style="color:red">{{ error }}</p>
-    {% endif %}
+{% if segments %}
+<div>
+    <h3>Segments</h3>
+    <ul>
+    {% for s in segments %}
+        <li>{{ s.start }} – {{ s.end }} : {{ s.text }}
+            {% if s.confidence %} (conf {{ s.confidence }}){% endif %}
+        </li>
+    {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+{% if error %}
+<p style="color:red">{{ error }}</p>
+{% endif %}
 
 </body>
-
 </html>
