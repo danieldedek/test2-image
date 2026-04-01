@@ -15,33 +15,46 @@ def index():
     transcript = None
     error = None
     audio_filename = None
+    segments = None
 
     if request.method == "POST":
         if request.form.get("action") == "clear":
             return render_template("index.html")
 
         engine_name = request.form.get("engine")
+        language = request.form.get("language")
+        device = request.form.get("device", "cpu")
+        timestamps = "timestamps" in request.form
+        confidence = "confidence" in request.form
+        verbose = "verbose" in request.form
 
         try:
             name = secure_filename(request.form.get("audio_file", "").strip())
-
             if not name:
                 raise ValueError("No file selected")
 
             wav_path = os.path.join(app.config["UPLOAD_FOLDER"], name)
-
             if not os.path.exists(wav_path):
                 raise ValueError("File does not exist")
 
             audio_file = wav_path
             audio_filename = name
 
-            asr = create_asr_engine(engine_name)
+            asr = create_asr_engine(engine_name, device=device)
             asr.download()
-            transcript = asr.transcribe(audio_file)
+            result = asr.transcribe(
+                audio_file,
+                language=language,
+                timestamps=timestamps,
+                confidence=confidence,
+                verbose=verbose
+            )
 
-            if engine_name in ("canary", "parakeet"):
-                transcript = transcript.text
+            if isinstance(result, dict):
+                transcript = result.get("text")
+                segments = result.get("segments")
+            else:
+                transcript = result
 
         except Exception as e:
             error = f"Error: {e}"
@@ -49,15 +62,15 @@ def index():
     return render_template(
         "index.html",
         transcript=transcript,
-        error=error,
-        audio_filename=audio_filename
+        segments=segments,
+        audio_filename=audio_filename,
+        error=error
     )
 
 
 @app.route("/uploads/<path:filename>")
 def uploaded_file(filename):
     file_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
-
     if not os.path.exists(file_path):
         return f"File not found: {file_path}", 404
 
