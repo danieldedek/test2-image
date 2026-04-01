@@ -15,18 +15,13 @@ def index():
     transcript = None
     error = None
     audio_filename = None
-    segments = None
 
     if request.method == "POST":
         if request.form.get("action") == "clear":
             return render_template("index.html")
 
         engine_name = request.form.get("engine")
-        language = request.form.get("language")
         device = request.form.get("device", "cpu")
-        timestamps = "timestamps" in request.form
-        confidence = "confidence" in request.form
-        verbose = "verbose" in request.form
 
         try:
             name = secure_filename(request.form.get("audio_file", "").strip())
@@ -42,29 +37,19 @@ def index():
 
             asr = create_asr_engine(engine_name, device=device)
             asr.download()
-            result = asr.transcribe(
-                audio_file,
-                language=language,
-                timestamps=timestamps,
-                confidence=confidence,
-                verbose=verbose
-            )
+            transcript = asr.transcribe(audio_file)
 
-            if isinstance(result, dict):
-                transcript = result.get("text")
-                segments = result.get("segments")
-            else:
-                transcript = result
-
+            if engine_name in ("canary", "parakeet"):
+                transcript = transcript.text
+                
         except Exception as e:
             error = f"Error: {e}"
 
     return render_template(
         "index.html",
         transcript=transcript,
-        segments=segments,
-        audio_filename=audio_filename,
-        error=error
+        error=error,
+        audio_filename=audio_filename
     )
 
 
