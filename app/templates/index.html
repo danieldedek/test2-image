@@ -11,9 +11,17 @@
 
     <h2>Transcription</h2>
 
+    <h3>Upload WAV file</h3>
+    <form method="POST" enctype="multipart/form-data">
+        <input type="file" name="file" accept=".wav">
+        <button type="submit">Upload</button>
+    </form>
+
+    <hr>
+
     <form method="POST">
         <div>
-            <label>Existing WAV file (in uploads/):</label>
+            <label>Existing WAV file:</label>
             <input type="text" name="audio_file" placeholder="example.wav">
         </div>
 
@@ -40,12 +48,43 @@
         </div>
     </form>
 
+    {% if error %}
+    <div class="card" style="background:#ffe6e6; color:#c0392b;">
+        {{ error }}
+    </div>
+    {% endif %}
+
+    {% if files %}
+    <div class="card">
+        <h3>Uploaded files</h3>
+        <ul>
+            {% for file in files %}
+            <li>
+                <strong>{{ file }}</strong>
+
+                <audio controls>
+                    <source src="{{ url_for('uploaded_file', filename=file) }}" type="audio/wav">
+                </audio>
+
+                <form method="POST" style="display:inline;">
+                    <input type="hidden" name="audio_file" value="{{ file }}">
+                    <button type="submit">Use</button>
+                </form>
+
+                <form method="POST" action="{{ url_for('delete_file', filename=file) }}" style="display:inline;">
+                    <button type="submit" style="background:#c0392b;">Delete</button>
+                </form>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
     {% if audio_filename %}
     <div class="card">
         <h3>Play audio</h3>
         <audio controls>
             <source src="{{ url_for('uploaded_file', filename=audio_filename) }}" type="audio/wav">
-            Your browser does not support the audio element.
         </audio>
     </div>
     {% endif %}
@@ -54,7 +93,7 @@
     <div class="card">
         <h3>Transcript</h3>
         <textarea readonly>{{ transcript }}</textarea>
-        <form method="POST" action="/download" style="margin-top: 10px;">
+        <form method="POST" action="/download">
             <input type="hidden" name="transcript" value="{{ transcript }}">
             <button>Download</button>
         </form>
