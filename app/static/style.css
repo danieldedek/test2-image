@@ -29,10 +29,17 @@ form {
 
 input[type="text"], select, textarea {
     width: 100%;
+    max-width: 100%;
     padding: 10px;
     border-radius: 8px;
     border: 1px solid #ccc;
     margin-bottom: 10px;
+    box-sizing: border-box;
+}
+
+textarea {
+    resize: vertical;
+    min-height: 150px;
 }
 
 button {
@@ -50,6 +57,7 @@ button:hover {
 
 audio {
     width: 100%;
+    max-width: 100%;
     margin: 10px 0;
 }
 
@@ -58,10 +66,12 @@ audio {
     padding: 15px;
     border-radius: 10px;
     margin-bottom: 15px;
+    overflow: hidden;
 }
 
 ul {
     padding-left: 0;
+    margin: 0;
 }
 
 li {
