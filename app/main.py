@@ -1,10 +1,14 @@
 from flask import Flask, render_template, request, send_from_directory, send_file, redirect, url_for
+from werkzeug.middleware.proxy_fix import ProxyFix
 from utils import create_asr_engine
 from io import BytesIO
 from werkzeug.utils import secure_filename
 import os
 
 app = Flask(__name__)
+
+app.wsgi_app = ProxyFix(app.wsgi_app, x_prefix=1)
+
 UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
