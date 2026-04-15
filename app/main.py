@@ -18,7 +18,6 @@ def get_wav_files():
 def index():
     transcript = None
     error = None
-    audio_filename = None
 
     if request.method == "POST":
         if request.form.get("action") == "clear":
@@ -32,29 +31,26 @@ def index():
                 file.save(path)
                 return redirect(url_for("index"))
 
-        engine_name = request.form.get("engine")
-        device = request.form.get("device", "cpu")
+        if "audio_file" in request.form:
+            engine_name = request.form.get("engine")
+            device = request.form.get("device", "cpu")
 
-        try:
-            name = secure_filename(request.form.get("audio_file", "").strip())
-            if not name:
-                raise ValueError("No file selected")
+            try:
+                name = secure_filename(request.form.get("audio_file"))
+                wav_path = os.path.join(app.config["UPLOAD_FOLDER"], name)
 
-            wav_path = os.path.join(app.config["UPLOAD_FOLDER"], name)
-            if not os.path.exists(wav_path):
-                raise ValueError("File does not exist")
+                if not os.path.exists(wav_path):
+                    raise ValueError("File does not exist")
 
-            audio_filename = name
+                asr = create_asr_engine(engine_name, device=device)
+                asr.download()
+                transcript = asr.transcribe(wav_path)
 
-            asr = create_asr_engine(engine_name, device=device)
-            asr.download()
-            transcript = asr.transcribe(wav_path)
+                if engine_name in ("canary", "parakeet"):
+                    transcript = transcript.text
 
-            if engine_name in ("canary", "parakeet"):
-                transcript = transcript.text
-
-        except Exception as e:
-            error = f"Error: {e}"
+            except Exception as e:
+                error = f"Error: {e}"
 
     files = get_wav_files()
 
@@ -62,7 +58,6 @@ def index():
         "index.html",
         transcript=transcript,
         error=error,
-        audio_filename=audio_filename,
         files=files
     )
 
