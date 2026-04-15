@@ -9,7 +9,7 @@
 
 <div class="container">
 
-    <h2>Transcription</h2>
+    <h2>ASR Demo</h2>
 
     <h3>Upload WAV file</h3>
     <form method="POST" enctype="multipart/form-data">
@@ -20,32 +20,20 @@
     <hr>
 
     <form method="POST">
-        <div>
-            <label>Existing WAV file:</label>
-            <input type="text" name="audio_file" placeholder="example.wav">
-        </div>
+        <h3>Model settings</h3>
 
-        <div>
-            <h3>Model</h3>
-            <select name="engine">
-                <option value="canary">canary</option>
-                <option value="parakeet">parakeet</option>
-                <option value="whisper">whisper</option>
-            </select>
-        </div>
+        <select name="engine">
+            <option value="canary">canary</option>
+            <option value="parakeet">parakeet</option>
+            <option value="whisper">whisper</option>
+        </select>
 
-        <div>
-            <label>Device:</label>
-            <select name="device">
-                <option value="cpu">CPU</option>
-                <option value="cuda">GPU</option>
-            </select>
-        </div>
+        <select name="device">
+            <option value="cpu">CPU</option>
+            <option value="cuda">GPU</option>
+        </select>
 
-        <div>
-            <button type="submit">Transcribe</button>
-            <button type="submit" name="action" value="clear">Clear</button>
-        </div>
+        <button type="submit" name="action" value="clear">Clear</button>
     </form>
 
     {% if error %}
@@ -57,6 +45,7 @@
     {% if files %}
     <div class="card">
         <h3>Uploaded files</h3>
+
         <ul>
             {% for file in files %}
             <li>
@@ -68,6 +57,8 @@
 
                 <form method="POST" style="display:inline;">
                     <input type="hidden" name="audio_file" value="{{ file }}">
+                    <input type="hidden" name="engine" value="{{ request.form.engine or 'canary' }}">
+                    <input type="hidden" name="device" value="{{ request.form.device or 'cpu' }}">
                     <button type="submit">Use</button>
                 </form>
 
@@ -80,19 +71,11 @@
     </div>
     {% endif %}
 
-    {% if audio_filename %}
-    <div class="card">
-        <h3>Play audio</h3>
-        <audio controls>
-            <source src="{{ url_for('uploaded_file', filename=audio_filename) }}" type="audio/wav">
-        </audio>
-    </div>
-    {% endif %}
-
     {% if transcript %}
     <div class="card">
         <h3>Transcript</h3>
         <textarea readonly>{{ transcript }}</textarea>
+
         <form method="POST" action="/download">
             <input type="hidden" name="transcript" value="{{ transcript }}">
             <button>Download</button>
