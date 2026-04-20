@@ -9,7 +9,7 @@ app = Flask(__name__)
 
 app.wsgi_app = ProxyFix(app.wsgi_app, x_prefix=1)
 
-UPLOAD_FOLDER = "/home/umbrel/umbrel/app-data/shop-test2/uploads"
+UPLOAD_FOLDER = "/app/uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
