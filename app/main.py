@@ -14,13 +14,20 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
 
-def get_wav_files(page, sort):
+def get_wav_files(page, sort, search):
     all_files = [f for f in os.listdir(UPLOAD_FOLDER) if f.lower().endswith(".wav")]
+
+    if search:
+        search_lower = search.lower()
+        all_files = [f for f in all_files if search_lower in f.lower()]
 
     if sort == "name":
         all_files.sort()
     else:
-        all_files.sort(key=lambda f: os.path.getmtime(os.path.join(UPLOAD_FOLDER, f)), reverse=True)
+        all_files.sort(
+            key=lambda f: os.path.getmtime(os.path.join(UPLOAD_FOLDER, f)),
+            reverse=True
+        )
 
     total = len(all_files)
     start = (page - 1) * FILES_PER_PAGE
@@ -42,10 +49,11 @@ def index():
 
     page = int(request.args.get("page", 1))
     sort = request.args.get("sort", "date")
+    search = request.args.get("search", "")
 
     if request.method == "POST":
         if request.form.get("action") == "clear":
-            return redirect(url_for("index", sort=sort, page=page))
+            return redirect(url_for("index", sort=sort, page=page, search=search))
 
         if "file" in request.files:
             file = request.files["file"]
@@ -53,7 +61,7 @@ def index():
                 filename = secure_filename(file.filename)
                 path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
                 file.save(path)
-                return redirect(url_for("index", page=1, sort=sort))
+                return redirect(url_for("index", page=1, sort=sort, search=search))
 
         if "audio_file" in request.form:
             engine_name = request.form.get("engine")
@@ -76,7 +84,7 @@ def index():
             except Exception as e:
                 error = f"Error: {e}"
 
-    files, has_next, has_prev, total_pages = get_wav_files(page, sort)
+    files, has_next, has_prev, total_pages = get_wav_files(page, sort, search)
 
     return render_template(
         "index.html",
@@ -87,7 +95,8 @@ def index():
         has_next=has_next,
         has_prev=has_prev,
         total_pages=total_pages,
-        sort=sort
+        sort=sort,
+        search=search
     )
 
 
