@@ -18,8 +18,7 @@ def get_wav_files(page, sort, search):
     all_files = [f for f in os.listdir(UPLOAD_FOLDER) if f.lower().endswith(".wav")]
 
     if search:
-        search_lower = search.lower()
-        all_files = [f for f in all_files if search_lower in f.lower()]
+        all_files = [f for f in all_files if search.lower() in f.lower()]
 
     if sort == "name":
         all_files.sort()
@@ -59,8 +58,7 @@ def index():
             file = request.files["file"]
             if file and file.filename != "":
                 filename = secure_filename(file.filename)
-                path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
-                file.save(path)
+                file.save(os.path.join(UPLOAD_FOLDER, filename))
                 return redirect(url_for("index", page=1, sort=sort, search=search))
 
         if "audio_file" in request.form:
@@ -69,7 +67,7 @@ def index():
 
             try:
                 name = secure_filename(request.form.get("audio_file"))
-                wav_path = os.path.join(app.config["UPLOAD_FOLDER"], name)
+                wav_path = os.path.join(UPLOAD_FOLDER, name)
 
                 if not os.path.exists(wav_path):
                     raise ValueError("File does not exist")
@@ -102,25 +100,18 @@ def index():
 
 @app.route("/uploads/<filename>")
 def uploaded_file(filename):
-    return send_from_directory(app.config["UPLOAD_FOLDER"], filename)
+    return send_from_directory(UPLOAD_FOLDER, filename)
 
 
 @app.route("/download", methods=["POST"])
 def download():
-    text = request.form.get("transcript", "")
-    buffer = BytesIO(text.encode("utf-8"))
-    buffer.seek(0)
-    return send_file(
-        buffer,
-        as_attachment=True,
-        download_name="transcript.txt",
-        mimetype="text/plain"
-    )
+    buffer = BytesIO(request.form.get("transcript", "").encode("utf-8"))
+    return send_file(buffer, as_attachment=True, download_name="transcript.txt")
 
 
 @app.route("/delete/<filename>", methods=["POST"])
 def delete_file(filename):
-    path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+    path = os.path.join(UPLOAD_FOLDER, filename)
     if os.path.exists(path):
         os.remove(path)
     return redirect(url_for("index"))
