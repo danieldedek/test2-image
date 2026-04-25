@@ -11,31 +11,47 @@
 
     <aside class="sidebar">
 
-        <h3>Uploaded files</h3>
+        <h2>Files</h2>
+
+        <form method="GET" class="search-box">
+            <input type="text" name="q" placeholder="Search..." value="{{ search }}">
+            <button type="submit">Go</button>
+        </form>
+
+        <div class="sort-row">
+            <a href="?sort=date{% if search %}&q={{ search }}{% endif %}">📅 Date</a>
+            <a href="?sort=alpha{% if search %}&q={{ search }}{% endif %}">🔤 A-Z</a>
+        </div>
 
         {% if files %}
-            <ul>
-                {% for file in files %}
-                <li>
-                    <strong>{{ file }}</strong>
+        <ul class="file-list">
+            {% for f in files %}
+            <li>
+                <form method="POST">
+                    <input type="hidden" name="audio_file" value="{{ f.name }}">
+                    <input type="hidden" name="engine" value="{{ request.form.engine or 'canary' }}">
+                    <input type="hidden" name="device" value="{{ request.form.device or 'cpu' }}">
 
-                    <audio controls>
-                        <source src="{{ url_for('uploaded_file', filename=file) }}" type="audio/wav">
-                    </audio>
+                    <button class="file-btn {% if selected_file == f.name %}active-file{% endif %}">
+                        {{ f.name }}
+                    </button>
+                </form>
+            </li>
+            {% endfor %}
+        </ul>
 
-                    <form method="POST" style="display:inline;">
-                        <input type="hidden" name="audio_file" value="{{ file }}">
-                        <input type="hidden" name="engine" value="{{ request.form.engine or 'canary' }}">
-                        <input type="hidden" name="device" value="{{ request.form.device or 'cpu' }}">
-                        <button type="submit">Use</button>
-                    </form>
+        <div class="pagination">
+            {% if page > 1 %}
+                <a href="?page={{ page-1 }}{% if search %}&q={{ search }}{% endif %}&sort={{ sort }}">Prev</a>
+            {% endif %}
 
-                    <form method="POST" action="{{ url_for('delete_file', filename=file) }}" style="display:inline;">
-                        <button type="submit" style="background:#c0392b;">Delete</button>
-                    </form>
-                </li>
-                {% endfor %}
-            </ul>
+            <span>{{ page }} / {{ total_pages }}</span>
+
+            {% if page < total_pages %}
+                <a href="?page={{ page+1 }}{% if search %}&q={{ search }}{% endif %}&sort={{ sort }}">Next</a>
+            {% endif %}
+        </div>
+
         {% else %}
             <p>No files</p>
         {% endif %}
@@ -53,27 +69,27 @@
                 <button type="submit">Upload</button>
             </form>
 
-            <hr>
+            {% if selected_file %}
+            <div class="card">
+                <h3>Selected file</h3>
 
-            <form method="POST">
-                <h3>Model settings</h3>
+                <p>{{ selected_file }}</p>
 
-                <select name="engine">
-                    <option value="canary">canary</option>
-                    <option value="parakeet">parakeet</option>
-                    <option value="whisper">whisper</option>
-                </select>
+                <audio controls>
+                    <source src="{{ url_for('uploaded_file', filename=selected_file) }}" type="audio/wav">
+                </audio>
 
-                <select name="device">
-                    <option value="cpu">CPU</option>
-                    <option value="cuda">GPU</option>
-                </select>
-            </form>
+                <form method="POST">
+                    <input type="hidden" name="audio_file" value="{{ selected_file }}">
+                    <input type="hidden" name="engine" value="canary">
+                    <input type="hidden" name="device" value="cpu">
+                    <button type="submit">Use</button>
+                </form>
+            </div>
+            {% endif %}
 
             {% if error %}
-            <div class="card error">
-                {{ error }}
-            </div>
+            <div class="card error">{{ error }}</div>
             {% endif %}
 
             {% if transcript %}
@@ -82,17 +98,14 @@
 
                 <textarea readonly>{{ transcript }}</textarea>
 
-                <div class="button-row">
-                    <form method="POST" action="/download">
-                        <input type="hidden" name="transcript" value="{{ transcript }}">
-                        <button type="submit">Download</button>
-                    </form>
+                <form method="POST" action="/download">
+                    <input type="hidden" name="transcript" value="{{ transcript }}">
+                    <button type="submit">Download</button>
+                </form>
 
-                    <form method="POST">
-                        <button type="submit" name="action" value="clear">Clear</button>
-                    </form>
-                </div>
-
+                <form method="POST">
+                    <button type="submit" name="action" value="clear">Clear</button>
+                </form>
             </div>
             {% endif %}
 
