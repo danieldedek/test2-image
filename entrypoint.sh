@@ -1,8 +1,11 @@
 #!/bin/sh
 set -e
 
-mkdir -p /app/uploads
+echo "ddddd"
+whoami
+id
+which gosu || echo "gosu NOT FOUND"
 
-chown -R 1000:1000 /app/uploads
+echo "CMD: $@"
 
-exec su-exec 1000:1000 "$@"
+exec "$@"
