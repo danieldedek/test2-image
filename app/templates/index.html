@@ -11,19 +11,20 @@
 
     <aside class="sidebar">
 
-        <div class="sidebar-header">
+        <h3>Files</h3>
 
-            <h3>Files</h3>
+        <div class="controls">
 
             <form method="GET" class="search-form">
                 <input type="text" name="search" placeholder="Search..." value="{{ search }}">
                 <input type="hidden" name="sort" value="{{ sort }}">
+                <button type="submit">Go</button>
             </form>
 
             {% if sort == "date" %}
-                <a class="sort-btn" href="{{ url_for('index', sort='name', search=search) }}">Date ↓</a>
+                <a class="sort-btn" href="{{ url_for('index', sort='name', search=search) }}">Sort: Date ↓</a>
             {% else %}
-                <a class="sort-btn" href="{{ url_for('index', sort='date', search=search) }}">A-Z</a>
+                <a class="sort-btn" href="{{ url_for('index', sort='date', search=search) }}">Sort: A-Z</a>
             {% endif %}
 
         </div>
@@ -40,8 +41,6 @@
 
                     <form method="POST">
                         <input type="hidden" name="audio_file" value="{{ file }}">
-                        <input type="hidden" name="engine" value="{{ request.form.engine or 'canary' }}">
-                        <input type="hidden" name="device" value="{{ request.form.device or 'cpu' }}">
                         <button type="submit">Use</button>
                     </form>
 
@@ -53,15 +52,21 @@
             </ul>
 
             <div class="pagination">
-                {% if has_prev %}
-                    <a href="{{ url_for('index', page=page-1, sort=sort, search=search) }}">←</a>
-                {% endif %}
 
-                <span>{{ page }} / {{ total_pages }}</span>
+                <div class="page-controls">
+                    {% if has_prev %}
+                        <a href="{{ url_for('index', page=page-1, sort=sort, search=search) }}">←</a>
+                    {% endif %}
 
-                {% if has_next %}
-                    <a href="{{ url_for('index', page=page+1, sort=sort, search=search) }}">→</a>
-                {% endif %}
+                    {% if has_next %}
+                        <a href="{{ url_for('index', page=page+1, sort=sort, search=search) }}">→</a>
+                    {% endif %}
+                </div>
+
+                <div class="page-info">
+                    Page {{ page }} / {{ total_pages }}
+                </div>
+
             </div>
 
         {% else %}
@@ -76,8 +81,8 @@
             <h2>ASR Demo</h2>
 
             <form method="POST" enctype="multipart/form-data">
-                <input type="file" name="file" accept=".wav">
-                <button type="submit">Upload</button>
+                <input type="file" name="file">
+                <button>Upload</button>
             </form>
 
             <form method="POST">
