@@ -8,7 +8,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     ffmpeg \
-    su-exec \
+    gosu \
     && rm -rf /var/lib/apt/lists/*
 
 RUN useradd -u 1000 -m appuser
