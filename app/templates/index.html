@@ -12,13 +12,20 @@
     <aside class="sidebar">
 
         <div class="sidebar-header">
-            <h3>Uploaded files</h3>
+
+            <h3>Files</h3>
+
+            <form method="GET" class="search-form">
+                <input type="text" name="search" placeholder="Search..." value="{{ search }}">
+                <input type="hidden" name="sort" value="{{ sort }}">
+            </form>
 
             {% if sort == "date" %}
-                <a class="sort-btn" href="{{ url_for('index', sort='name') }}">Sort: Date ↓</a>
+                <a class="sort-btn" href="{{ url_for('index', sort='name', search=search) }}">Date ↓</a>
             {% else %}
-                <a class="sort-btn" href="{{ url_for('index', sort='date') }}">Sort: A-Z</a>
+                <a class="sort-btn" href="{{ url_for('index', sort='date', search=search) }}">A-Z</a>
             {% endif %}
+
         </div>
 
         {% if files %}
@@ -31,14 +38,14 @@
                         <source src="{{ url_for('uploaded_file', filename=file) }}" type="audio/wav">
                     </audio>
 
-                    <form method="POST" style="display:inline;">
+                    <form method="POST">
                         <input type="hidden" name="audio_file" value="{{ file }}">
                         <input type="hidden" name="engine" value="{{ request.form.engine or 'canary' }}">
                         <input type="hidden" name="device" value="{{ request.form.device or 'cpu' }}">
                         <button type="submit">Use</button>
                     </form>
 
-                    <form method="POST" action="{{ url_for('delete_file', filename=file) }}" style="display:inline;">
+                    <form method="POST" action="{{ url_for('delete_file', filename=file) }}">
                         <button type="submit" style="background:#c0392b;">Delete</button>
                     </form>
                 </li>
@@ -47,13 +54,13 @@
 
             <div class="pagination">
                 {% if has_prev %}
-                    <a href="{{ url_for('index', page=page-1, sort=sort) }}">← Previous</a>
+                    <a href="{{ url_for('index', page=page-1, sort=sort, search=search) }}">←</a>
                 {% endif %}
 
-                <span>Page {{ page }} / {{ total_pages }}</span>
+                <span>{{ page }} / {{ total_pages }}</span>
 
                 {% if has_next %}
-                    <a href="{{ url_for('index', page=page+1, sort=sort) }}">Next →</a>
+                    <a href="{{ url_for('index', page=page+1, sort=sort, search=search) }}">→</a>
                 {% endif %}
             </div>
 
@@ -68,17 +75,12 @@
 
             <h2>ASR Demo</h2>
 
-            <h3>Upload WAV file</h3>
             <form method="POST" enctype="multipart/form-data">
                 <input type="file" name="file" accept=".wav">
                 <button type="submit">Upload</button>
             </form>
 
-            <hr>
-
             <form method="POST">
-                <h3>Model settings</h3>
-
                 <select name="engine">
                     <option value="canary">canary</option>
                     <option value="parakeet">parakeet</option>
@@ -91,26 +93,18 @@
                 </select>
             </form>
 
-            {% if error %}
-            <div class="card error">
-                {{ error }}
-            </div>
-            {% endif %}
-
             {% if transcript %}
             <div class="card">
-                <h3>Transcript</h3>
-
                 <textarea readonly>{{ transcript }}</textarea>
 
                 <div class="button-row">
                     <form method="POST" action="/download">
                         <input type="hidden" name="transcript" value="{{ transcript }}">
-                        <button type="submit">Download</button>
+                        <button>Download</button>
                     </form>
 
                     <form method="POST">
-                        <button type="submit" name="action" value="clear">Clear</button>
+                        <button name="action" value="clear">Clear</button>
                     </form>
                 </div>
             </div>
