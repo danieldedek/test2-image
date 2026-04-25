@@ -40,7 +40,7 @@ h2, h3 {
 }
 
 form {
-    margin-bottom: 10px;
+    margin-bottom: 15px;
 }
 
 input, select, textarea {
@@ -48,6 +48,7 @@ input, select, textarea {
     padding: 10px;
     border-radius: 8px;
     border: 1px solid #ccc;
+    margin-bottom: 10px;
     box-sizing: border-box;
 }
 
@@ -57,7 +58,7 @@ textarea {
 }
 
 button {
-    padding: 10px 12px;
+    padding: 10px 15px;
     border-radius: 8px;
     border: none;
     background: #192a56;
@@ -70,11 +71,42 @@ button:hover {
     background: #0f1b3a;
 }
 
+audio {
+    width: 100%;
+    margin: 10px 0;
+}
+
 .card {
     background: #f1f2f6;
     padding: 15px;
     border-radius: 10px;
     margin-bottom: 15px;
+}
+
+.card.error {
+    background: #ffe6e6;
+    color: #c0392b;
+}
+
+ul {
+    padding-left: 0;
+    margin: 0;
+}
+
+li {
+    list-style: none;
+    border-bottom: 1px solid #ddd;
+    padding: 10px 0;
+}
+
+.button-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.button-row form {
+    margin: 0;
 }
 
 .controls {
@@ -90,57 +122,52 @@ button:hover {
 }
 
 .search-form input {
+    flex: 1;
+    padding: 6px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 13px;
     height: 38px;
-    margin: 0;
+}
+
+.search-form button {
+    padding: 6px 10px;
 }
 
 .sort-btn {
+    font-size: 12px;
     text-decoration: none;
     background: #192a56;
     color: white;
-    padding: 8px;
+    padding: 6px;
     border-radius: 6px;
     text-align: center;
-    font-size: 12px;
 }
 
-.file-actions {
-    display: flex;
-    gap: 5px;
-    margin-top: 8px;
-}
-
-.file-actions form {
-    margin: 0;
-}
-
-.delete-btn {
-    background: #c0392b;
-}
-
-.delete-btn:hover {
-    background: #922b21;
-}
-
-.audio-player {
-    display: none;
-    width: 100%;
-    margin-top: 8px;
+.sort-btn:hover {
+    background: #0f1b3a;
 }
 
 .pagination {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     margin-top: 15px;
+    font-size: 14px;
 }
 
 .page-controls a {
     margin-right: 8px;
     text-decoration: none;
-    font-weight: bold;
     color: #192a56;
+    font-weight: bold;
+}
+
+.page-controls a:hover {
+    text-decoration: underline;
 }
 
 .page-info {
     font-size: 13px;
+    color: #555;
 }
