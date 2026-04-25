@@ -33,30 +33,20 @@
             <ul>
                 {% for file in files %}
                 <li>
-
                     <strong>{{ file }}</strong>
 
-                    <div class="file-actions">
-
-                        <form method="POST">
-                            <input type="hidden" name="audio_file" value="{{ file }}">
-                            <button type="submit">Use</button>
-                        </form>
-
-                        <button class="play-btn" onclick="toggleAudio('{{ loop.index }}', this)">
-                            Play
-                        </button>
-
-                        <form method="POST" action="{{ url_for('delete_file', filename=file) }}">
-                            <button type="submit" class="delete-btn">Delete</button>
-                        </form>
-
-                    </div>
-
-                    <audio id="audio-{{ loop.index }}" class="audio-player">
+                    <audio controls>
                         <source src="{{ url_for('uploaded_file', filename=file) }}" type="audio/wav">
                     </audio>
 
+                    <form method="POST">
+                        <input type="hidden" name="audio_file" value="{{ file }}">
+                        <button type="submit">Use</button>
+                    </form>
+
+                    <form method="POST" action="{{ url_for('delete_file', filename=file) }}">
+                        <button type="submit" style="background:#c0392b;">Delete</button>
+                    </form>
                 </li>
                 {% endfor %}
             </ul>
@@ -129,21 +119,6 @@
     </main>
 
 </div>
-
-<script>
-function toggleAudio(id, btn) {
-    const audio = document.getElementById("audio-" + id);
-
-    if (audio.style.display === "none" || audio.style.display === "") {
-        audio.style.display = "block";
-        btn.innerText = "Stop";
-    } else {
-        audio.style.display = "none";
-        audio.pause();
-        btn.innerText = "Play";
-    }
-}
-</script>
 
 </body>
 </html>
