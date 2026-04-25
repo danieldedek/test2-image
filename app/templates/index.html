@@ -43,7 +43,6 @@
     </aside>
 
     <main class="main">
-
         <div class="container">
 
             <h2>ASR Demo</h2>
@@ -69,8 +68,6 @@
                     <option value="cpu">CPU</option>
                     <option value="cuda">GPU</option>
                 </select>
-
-                <button type="submit" name="action" value="clear">Clear</button>
             </form>
 
             {% if error %}
@@ -82,17 +79,24 @@
             {% if transcript %}
             <div class="card">
                 <h3>Transcript</h3>
+
                 <textarea readonly>{{ transcript }}</textarea>
 
-                <form method="POST" action="/download">
-                    <input type="hidden" name="transcript" value="{{ transcript }}">
-                    <button>Download</button>
-                </form>
+                <div class="button-row">
+                    <form method="POST" action="/download">
+                        <input type="hidden" name="transcript" value="{{ transcript }}">
+                        <button type="submit">Download</button>
+                    </form>
+
+                    <form method="POST">
+                        <button type="submit" name="action" value="clear">Clear</button>
+                    </form>
+                </div>
+
             </div>
             {% endif %}
 
         </div>
-
     </main>
 
 </div>
