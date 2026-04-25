@@ -135,3 +135,23 @@ li {
 .pagination a:hover {
     text-decoration: underline;
 }
+
+.sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.sort-btn {
+    font-size: 12px;
+    text-decoration: none;
+    background: #192a56;
+    color: white;
+    padding: 5px 8px;
+    border-radius: 6px;
+}
+
+.sort-btn:hover {
+    background: #0f1b3a;
+}
