@@ -25,4 +25,4 @@ RUN chmod +x /entrypoint.sh
 EXPOSE 5000
 
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["python", "app/main.py"]
+CMD ["python", "--version"]
