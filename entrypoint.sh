@@ -4,8 +4,14 @@ set -e
 echo "ddddd"
 whoami
 id
-which gosu || echo "gosu NOT FOUND"
 
-echo "CMD: $@"
+echo "prep"
+mkdir -p /app/uploads
 
-exec "$@"
+chown -R 1000:1000 /app/uploads
+
+echo "ffff"
+
+echo "start"
+
+exec gosu 1000:1000 "$@"
