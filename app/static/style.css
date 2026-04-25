@@ -107,3 +107,31 @@ li {
 .button-row form {
     margin: 0;
 }
+
+.button-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.button-row form {
+    margin: 0;
+}
+
+.pagination {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+    font-size: 14px;
+}
+
+.pagination a {
+    text-decoration: none;
+    color: #192a56;
+    font-weight: bold;
+}
+
+.pagination a:hover {
+    text-decoration: underline;
+}
