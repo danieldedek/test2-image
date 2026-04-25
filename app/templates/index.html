@@ -36,6 +36,19 @@
                 </li>
                 {% endfor %}
             </ul>
+
+            <div class="pagination">
+                {% if has_prev %}
+                    <a href="{{ url_for('index', page=page-1) }}">← Previous</a>
+                {% endif %}
+
+                <span>Page {{ page }} / {{ total_pages }}</span>
+
+                {% if has_next %}
+                    <a href="{{ url_for('index', page=page+1) }}">Next →</a>
+                {% endif %}
+            </div>
+
         {% else %}
             <p>No files</p>
         {% endif %}
@@ -92,7 +105,6 @@
                         <button type="submit" name="action" value="clear">Clear</button>
                     </form>
                 </div>
-
             </div>
             {% endif %}
 
