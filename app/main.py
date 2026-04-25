@@ -14,9 +14,13 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
 
-def get_wav_files(page):
+def get_wav_files(page, sort):
     all_files = [f for f in os.listdir(UPLOAD_FOLDER) if f.lower().endswith(".wav")]
-    all_files.sort(reverse=True)
+
+    if sort == "name":
+        all_files.sort()
+    else:
+        all_files.sort(key=lambda f: os.path.getmtime(os.path.join(UPLOAD_FOLDER, f)), reverse=True)
 
     total = len(all_files)
     start = (page - 1) * FILES_PER_PAGE
@@ -37,10 +41,11 @@ def index():
     error = None
 
     page = int(request.args.get("page", 1))
+    sort = request.args.get("sort", "date")
 
     if request.method == "POST":
         if request.form.get("action") == "clear":
-            return redirect(url_for("index"))
+            return redirect(url_for("index", sort=sort, page=page))
 
         if "file" in request.files:
             file = request.files["file"]
@@ -48,7 +53,7 @@ def index():
                 filename = secure_filename(file.filename)
                 path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
                 file.save(path)
-                return redirect(url_for("index", page=1))
+                return redirect(url_for("index", page=1, sort=sort))
 
         if "audio_file" in request.form:
             engine_name = request.form.get("engine")
@@ -71,7 +76,7 @@ def index():
             except Exception as e:
                 error = f"Error: {e}"
 
-    files, has_next, has_prev, total_pages = get_wav_files(page)
+    files, has_next, has_prev, total_pages = get_wav_files(page, sort)
 
     return render_template(
         "index.html",
@@ -81,7 +86,8 @@ def index():
         page=page,
         has_next=has_next,
         has_prev=has_prev,
-        total_pages=total_pages
+        total_pages=total_pages,
+        sort=sort
     )
 
 
