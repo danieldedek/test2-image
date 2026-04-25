@@ -64,7 +64,6 @@ button {
     background: #192a56;
     color: white;
     cursor: pointer;
-    height: 38px;
 }
 
 button:hover {
@@ -107,67 +106,4 @@ li {
 
 .button-row form {
     margin: 0;
-}
-
-.controls {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-bottom: 15px;
-}
-
-.search-form {
-    display: flex;
-    gap: 5px;
-}
-
-.search-form input {
-    flex: 1;
-    padding: 6px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    font-size: 13px;
-    height: 38px;
-}
-
-.search-form button {
-    padding: 6px 10px;
-}
-
-.sort-btn {
-    font-size: 12px;
-    text-decoration: none;
-    background: #192a56;
-    color: white;
-    padding: 6px;
-    border-radius: 6px;
-    text-align: center;
-}
-
-.sort-btn:hover {
-    background: #0f1b3a;
-}
-
-.pagination {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 15px;
-    font-size: 14px;
-}
-
-.page-controls a {
-    margin-right: 8px;
-    text-decoration: none;
-    color: #192a56;
-    font-weight: bold;
-}
-
-.page-controls a:hover {
-    text-decoration: underline;
-}
-
-.page-info {
-    font-size: 13px;
-    color: #555;
 }
