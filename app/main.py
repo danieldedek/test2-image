@@ -3,22 +3,40 @@ from utils import create_asr_engine
 from io import BytesIO
 from werkzeug.utils import secure_filename
 import os
+import math
 
 app = Flask(__name__)
 
 UPLOAD_FOLDER = "/app/uploads"
+FILES_PER_PAGE = 10
+
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
 
-def get_wav_files():
-    return [f for f in os.listdir(UPLOAD_FOLDER) if f.lower().endswith(".wav")]
+def get_wav_files(page):
+    all_files = [f for f in os.listdir(UPLOAD_FOLDER) if f.lower().endswith(".wav")]
+    all_files.sort(reverse=True)
+
+    total = len(all_files)
+    start = (page - 1) * FILES_PER_PAGE
+    end = start + FILES_PER_PAGE
+
+    files = all_files[start:end]
+
+    has_next = end < total
+    has_prev = start > 0
+    total_pages = max(1, math.ceil(total / FILES_PER_PAGE))
+
+    return files, has_next, has_prev, total_pages
 
 
 @app.route("/", methods=["GET", "POST"])
 def index():
     transcript = None
     error = None
+
+    page = int(request.args.get("page", 1))
 
     if request.method == "POST":
         if request.form.get("action") == "clear":
@@ -30,7 +48,7 @@ def index():
                 filename = secure_filename(file.filename)
                 path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
                 file.save(path)
-                return redirect(url_for("index"))
+                return redirect(url_for("index", page=1))
 
         if "audio_file" in request.form:
             engine_name = request.form.get("engine")
@@ -53,13 +71,17 @@ def index():
             except Exception as e:
                 error = f"Error: {e}"
 
-    files = get_wav_files()
+    files, has_next, has_prev, total_pages = get_wav_files(page)
 
     return render_template(
         "index.html",
         transcript=transcript,
         error=error,
-        files=files
+        files=files,
+        page=page,
+        has_next=has_next,
+        has_prev=has_prev,
+        total_pages=total_pages
     )
 
 
