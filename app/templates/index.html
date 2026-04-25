@@ -11,7 +11,15 @@
 
     <aside class="sidebar">
 
-        <h3>Uploaded files</h3>
+        <div class="sidebar-header">
+            <h3>Uploaded files</h3>
+
+            {% if sort == "date" %}
+                <a class="sort-btn" href="{{ url_for('index', sort='name') }}">Sort: Date ↓</a>
+            {% else %}
+                <a class="sort-btn" href="{{ url_for('index', sort='date') }}">Sort: A-Z</a>
+            {% endif %}
+        </div>
 
         {% if files %}
             <ul>
@@ -39,13 +47,13 @@
 
             <div class="pagination">
                 {% if has_prev %}
-                    <a href="{{ url_for('index', page=page-1) }}">← Previous</a>
+                    <a href="{{ url_for('index', page=page-1, sort=sort) }}">← Previous</a>
                 {% endif %}
 
                 <span>Page {{ page }} / {{ total_pages }}</span>
 
                 {% if has_next %}
-                    <a href="{{ url_for('index', page=page+1) }}">Next →</a>
+                    <a href="{{ url_for('index', page=page+1, sort=sort) }}">Next →</a>
                 {% endif %}
             </div>
 
