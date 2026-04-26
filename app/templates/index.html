@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <title>ASR Demo</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    {% if error == "Processing..." %}
+    <meta http-equiv="refresh" content="2">
+    {% endif %}
 </head>
 <body>
 
@@ -50,21 +54,17 @@
             </ul>
 
             <div class="pagination">
-
                 <div>
                     {% if page > 1 %}
                         <a href="{{ url_for('index', page=page-1, sort=sort, search=search) }}">←</a>
                     {% endif %}
-
                     {% if page < total_pages %}
                         <a href="{{ url_for('index', page=page+1, sort=sort, search=search) }}">→</a>
                     {% endif %}
                 </div>
-
                 <div>
                     Page {{ page }} / {{ total_pages }}
                 </div>
-
             </div>
 
         {% else %}
@@ -95,6 +95,12 @@
                     <option value="cuda" {% if device == "cuda" %}selected{% endif %}>GPU</option>
                 </select>
             </form>
+
+            {% if error %}
+            <div class="card error">
+                {{ error }}
+            </div>
+            {% endif %}
 
             {% if transcript %}
             <div class="card">
