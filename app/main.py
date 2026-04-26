@@ -4,8 +4,6 @@ from io import BytesIO
 from werkzeug.utils import secure_filename
 import os
 import math
-import threading
-import uuid
 
 app = Flask(__name__)
 
@@ -14,9 +12,6 @@ FILES_PER_PAGE = 10
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
-
-tasks = {}
-tasks_lock = threading.Lock()
 
 
 def get_wav_files(page, sort, search):
@@ -42,23 +37,6 @@ def get_wav_files(page, sort, search):
     return files[start:end], total_pages
 
 
-def run_asr(task_id, wav_path, engine, device):
-    try:
-        asr = create_asr_engine(engine, device=device)
-        asr.download()
-        result = asr.transcribe(wav_path)
-
-        if engine in ("canary", "parakeet"):
-            result = result.text
-
-        with tasks_lock:
-            tasks[task_id] = {"status": "done", "result": result}
-
-    except Exception as e:
-        with tasks_lock:
-            tasks[task_id] = {"status": "error", "error": str(e)}
-
-
 @app.route("/", methods=["GET", "POST"])
 def index():
     transcript = None
@@ -67,7 +45,6 @@ def index():
     page = int(request.args.get("page", 1))
     sort = request.args.get("sort", "date")
     search = request.args.get("search", "")
-    task_id = request.args.get("task")
 
     engine = request.form.get("engine") or "canary"
     device = request.form.get("device") or "cpu"
@@ -85,37 +62,22 @@ def index():
                 return redirect(url_for("index", page=1, sort=sort, search=search))
 
         if "audio_file" in request.form:
-            name = secure_filename(request.form.get("audio_file"))
-            wav_path = os.path.join(UPLOAD_FOLDER, name)
+            try:
+                name = secure_filename(request.form.get("audio_file"))
+                wav_path = os.path.join(UPLOAD_FOLDER, name)
 
-            task_id = str(uuid.uuid4())
+                if not os.path.exists(wav_path):
+                    raise ValueError("File does not exist")
 
-            with tasks_lock:
-                tasks[task_id] = {"status": "running"}
+                asr = create_asr_engine(engine, device=device)
+                asr.download()
+                transcript = asr.transcribe(wav_path)
 
-            thread = threading.Thread(
-                target=run_asr,
-                args=(task_id, wav_path, engine, device)
-            )
-            thread.start()
+                if engine in ("canary", "parakeet"):
+                    transcript = transcript.text
 
-            return redirect(url_for("index", task=task_id, page=page, sort=sort, search=search))
-
-    if task_id:
-        with tasks_lock:
-            task = tasks.get(task_id)
-
-        if task:
-            if task["status"] == "done":
-                transcript = task["result"]
-                with tasks_lock:
-                    del tasks[task_id]
-
-            elif task["status"] == "error":
-                error = task["error"]
-
-            else:
-                error = "Processing..."
+            except Exception as e:
+                error = f"Error: {e}"
 
     files, total_pages = get_wav_files(page, sort, search)
 
@@ -129,8 +91,7 @@ def index():
         sort=sort,
         search=search,
         engine=engine,
-        device=device,
-        task_id=task_id
+        device=device
     )
 
 
@@ -151,3 +112,7 @@ def delete_file(filename):
     if os.path.exists(path):
         os.remove(path)
     return redirect(url_for("index"))
+
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000, debug=True)
