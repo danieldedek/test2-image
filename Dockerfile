@@ -25,4 +25,4 @@ RUN chmod +x /entrypoint.sh
 EXPOSE 5000
 
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["gunicorn", "-w", "1", "-k", "gthread", "--threads", "8", "-b", "0.0.0.0:5000", "main:app"]
+CMD ["python", "app/main.py"]
