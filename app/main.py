@@ -70,7 +70,6 @@ def index():
                     raise ValueError("File does not exist")
 
                 asr = create_asr_engine(engine, device=device)
-                asr.download()
                 transcript = asr.transcribe(wav_path)
 
                 if engine in ("canary", "parakeet"):
