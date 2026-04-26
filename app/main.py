@@ -10,12 +10,13 @@ import uuid
 app = Flask(__name__)
 
 UPLOAD_FOLDER = "/app/uploads"
-FILES_PER_PAGE = 5
+FILES_PER_PAGE = 10
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
 tasks = {}
+tasks_lock = threading.Lock()
 
 
 def get_wav_files(page, sort, search):
@@ -50,10 +51,12 @@ def run_asr(task_id, wav_path, engine, device):
         if engine in ("canary", "parakeet"):
             result = result.text
 
-        tasks[task_id] = {"status": "done", "result": result}
+        with tasks_lock:
+            tasks[task_id] = {"status": "done", "result": result}
 
     except Exception as e:
-        tasks[task_id] = {"status": "error", "error": str(e)}
+        with tasks_lock:
+            tasks[task_id] = {"status": "error", "error": str(e)}
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -86,7 +89,9 @@ def index():
             wav_path = os.path.join(UPLOAD_FOLDER, name)
 
             task_id = str(uuid.uuid4())
-            tasks[task_id] = {"status": "running"}
+
+            with tasks_lock:
+                tasks[task_id] = {"status": "running"}
 
             thread = threading.Thread(
                 target=run_asr,
@@ -96,17 +101,21 @@ def index():
 
             return redirect(url_for("index", task=task_id, page=page, sort=sort, search=search))
 
-    if task_id and task_id in tasks:
-        task = tasks[task_id]
+    if task_id:
+        with tasks_lock:
+            task = tasks.get(task_id)
 
-        if task["status"] == "done":
-            transcript = task["result"]
+        if task:
+            if task["status"] == "done":
+                transcript = task["result"]
+                with tasks_lock:
+                    del tasks[task_id]
 
-        elif task["status"] == "error":
-            error = task["error"]
+            elif task["status"] == "error":
+                error = task["error"]
 
-        else:
-            error = "Processing..."
+            else:
+                error = "Processing..."
 
     files, total_pages = get_wav_files(page, sort, search)
 
@@ -142,8 +151,3 @@ def delete_file(filename):
     if os.path.exists(path):
         os.remove(path)
     return redirect(url_for("index"))
-
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True, threaded=True)
-    
