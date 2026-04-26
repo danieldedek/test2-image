@@ -13,6 +13,18 @@
 
         <h3>Uploaded files</h3>
 
+        <form method="GET" class="search-form">
+            <input type="text" name="search" value="{{ search }}" placeholder="Search...">
+            <input type="hidden" name="sort" value="{{ sort }}">
+            <button>Go</button>
+        </form>
+
+        {% if sort == "date" %}
+            <a class="sort-btn" href="{{ url_for('index', sort='name', search=search) }}">Sort: Date ↓</a>
+        {% else %}
+            <a class="sort-btn" href="{{ url_for('index', sort='date', search=search) }}">Sort: A-Z</a>
+        {% endif %}
+
         {% if files %}
             <ul>
                 {% for file in files %}
@@ -25,8 +37,8 @@
 
                     <form method="POST" style="display:inline;">
                         <input type="hidden" name="audio_file" value="{{ file }}">
-                        <input type="hidden" name="engine" value="{{ request.form.engine or 'canary' }}">
-                        <input type="hidden" name="device" value="{{ request.form.device or 'cpu' }}">
+                        <input type="hidden" name="engine" value="{{ engine }}">
+                        <input type="hidden" name="device" value="{{ device }}">
                         <button type="submit">Use</button>
                     </form>
 
@@ -36,6 +48,25 @@
                 </li>
                 {% endfor %}
             </ul>
+
+            <div class="pagination">
+
+                <div>
+                    {% if page > 1 %}
+                        <a href="{{ url_for('index', page=page-1, sort=sort, search=search) }}">←</a>
+                    {% endif %}
+
+                    {% if page < total_pages %}
+                        <a href="{{ url_for('index', page=page+1, sort=sort, search=search) }}">→</a>
+                    {% endif %}
+                </div>
+
+                <div>
+                    Page {{ page }} / {{ total_pages }}
+                </div>
+
+            </div>
+
         {% else %}
             <p>No files</p>
         {% endif %}
@@ -47,52 +78,38 @@
 
             <h2>ASR Demo</h2>
 
-            <h3>Upload WAV file</h3>
             <form method="POST" enctype="multipart/form-data">
                 <input type="file" name="file" accept=".wav">
                 <button type="submit">Upload</button>
             </form>
 
-            <hr>
-
             <form method="POST">
-                <h3>Model settings</h3>
-
                 <select name="engine">
-                    <option value="canary">canary</option>
-                    <option value="parakeet">parakeet</option>
-                    <option value="whisper">whisper</option>
+                    <option value="canary" {% if engine == "canary" %}selected{% endif %}>canary</option>
+                    <option value="parakeet" {% if engine == "parakeet" %}selected{% endif %}>parakeet</option>
+                    <option value="whisper" {% if engine == "whisper" %}selected{% endif %}>whisper</option>
                 </select>
 
                 <select name="device">
-                    <option value="cpu">CPU</option>
-                    <option value="cuda">GPU</option>
+                    <option value="cpu" {% if device == "cpu" %}selected{% endif %}>CPU</option>
+                    <option value="cuda" {% if device == "cuda" %}selected{% endif %}>GPU</option>
                 </select>
             </form>
 
-            {% if error %}
-            <div class="card error">
-                {{ error }}
-            </div>
-            {% endif %}
-
             {% if transcript %}
             <div class="card">
-                <h3>Transcript</h3>
-
                 <textarea readonly>{{ transcript }}</textarea>
 
                 <div class="button-row">
                     <form method="POST" action="/download">
                         <input type="hidden" name="transcript" value="{{ transcript }}">
-                        <button type="submit">Download</button>
+                        <button>Download</button>
                     </form>
 
                     <form method="POST">
-                        <button type="submit" name="action" value="clear">Clear</button>
+                        <button name="action" value="clear">Clear</button>
                     </form>
                 </div>
-
             </div>
             {% endif %}
 
