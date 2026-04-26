@@ -107,3 +107,54 @@ li {
 .button-row form {
     margin: 0;
 }
+
+.search-form {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 10px;
+}
+
+.search-form input {
+    flex: 1;
+    padding: 8px;
+    margin: 0;
+}
+
+.search-form button {
+    padding: 8px 12px;
+}
+
+.sort-btn {
+    display: block;
+    margin-bottom: 10px;
+    text-decoration: none;
+    background: #192a56;
+    color: white;
+    padding: 6px;
+    border-radius: 6px;
+    font-size: 12px;
+    text-align: center;
+}
+
+.sort-btn:hover {
+    background: #0f1b3a;
+}
+
+.pagination {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+    font-size: 14px;
+}
+
+.pagination a {
+    text-decoration: none;
+    color: #192a56;
+    font-weight: bold;
+    margin-right: 8px;
+}
+
+.pagination a:hover {
+    text-decoration: underline;
+}
