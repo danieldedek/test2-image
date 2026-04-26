@@ -15,6 +15,7 @@ body {
     background: #fff;
     padding: 20px;
     border-right: 1px solid #ddd;
+    overflow-y: auto;
 }
 
 .main {
@@ -39,6 +40,11 @@ input, select, textarea {
     border-radius: 8px;
     border: 1px solid #ccc;
     margin-bottom: 10px;
+}
+
+textarea {
+    resize: vertical;
+    min-height: 150px;
 }
 
 button {
@@ -76,10 +82,15 @@ li {
 .search-form {
     display: flex;
     gap: 5px;
+    margin-bottom: 10px;
 }
 
 .search-form input {
     flex: 1;
+}
+
+.search-form button {
+    height: 38px;
 }
 
 .sort-btn {
