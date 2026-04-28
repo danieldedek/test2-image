@@ -27,15 +27,16 @@ def index():
 
     strategy = request.form.get("strategy") or "beam"
     beam_size = int(request.form.get("beam_size", 5))
+
     use_fp16 = request.form.get("fp16") == "on"
 
     len_pen = float(request.form.get("len_pen", 1.0))
     language = request.form.get("language") or "cs"
     return_hypotheses = request.form.get("return_hypotheses") == "on"
+    batch_size = int(request.form.get("batch_size", 1))
 
     alpha = float(request.form.get("alpha", 0.5))
     beta = float(request.form.get("beta", 1.0))
-    batch_size = int(request.form.get("batch_size", 4))
 
     if request.method == "POST":
 
@@ -50,50 +51,55 @@ def index():
 
             return redirect(url_for("index", page=1, sort=sort, search=search))
 
-        if action == "transcribe" and "audio_file" in request.form:
+        if action in ["transcribe_file", "transcribe_ui"]:
 
-            name = secure_filename(request.form.get("audio_file"))
-            wav_path = os.path.join(UPLOAD_FOLDER, name)
-
-            if not os.path.exists(wav_path):
-                error = "File does not exist"
+            name = request.form.get("audio_file")
+            if not name:
+                error = "No file selected"
             else:
-                try:
-                    if engine == "parakeet":
-                        asr = create_asr_engine(
-                            engine,
-                            device=device,
-                            strategy=strategy,
-                            beam_size=beam_size,
-                            alpha=alpha,
-                            beta=beta,
-                            batch_size=batch_size,
-                            use_fp16=use_fp16
-                        )
+                wav_path = os.path.join(UPLOAD_FOLDER, secure_filename(name))
 
-                    elif engine == "canary":
-                        asr = create_asr_engine(
-                            engine,
-                            device=device,
-                            strategy=strategy,
-                            beam_size=beam_size,
-                            len_pen=len_pen,
-                            language=language,
-                            return_hypotheses=return_hypotheses,
-                            use_fp16=use_fp16
-                        )
+                if not os.path.exists(wav_path):
+                    error = "File does not exist"
+                else:
+                    try:
 
-                    result = asr.transcribe(wav_path)
-                    transcript = result
+                        if engine == "parakeet":
+                            asr = create_asr_engine(
+                                engine,
+                                device=device,
+                                strategy=strategy,
+                                beam_size=beam_size,
+                                alpha=alpha,
+                                beta=beta,
+                                batch_size=batch_size,
+                                use_fp16=use_fp16
+                            )
 
-                    if engine == "canary" and return_hypotheses:
-                        try:
-                            transcript = result.text
-                        except:
-                            transcript = str(result)
+                        elif engine == "canary":
+                            asr = create_asr_engine(
+                                engine,
+                                device=device,
+                                strategy=strategy,
+                                beam_size=beam_size,
+                                len_pen=len_pen,
+                                language=language,
+                                return_hypotheses=return_hypotheses,
+                                batch_size=batch_size,
+                                use_fp16=use_fp16
+                            )
 
-                except Exception as e:
-                    error = str(e)
+                        result = asr.transcribe(wav_path)
+                        transcript = result
+
+                        if engine == "canary" and return_hypotheses:
+                            try:
+                                transcript = result.text
+                            except:
+                                transcript = str(result)
+
+                    except Exception as e:
+                        error = str(e)
 
     files = [f for f in os.listdir(UPLOAD_FOLDER) if f.endswith(".wav")]
 
@@ -110,6 +116,7 @@ def index():
 
     return render_template(
         "index.html",
+
         transcript=transcript,
         error=error,
 
@@ -128,10 +135,10 @@ def index():
         len_pen=len_pen,
         language=language,
         return_hypotheses=return_hypotheses,
+        batch_size=batch_size,
 
         alpha=alpha,
         beta=beta,
-        batch_size=batch_size,
 
         use_fp16=use_fp16
     )
