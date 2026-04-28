@@ -46,14 +46,26 @@ def index():
     sort = request.args.get("sort", "date")
     search = request.args.get("search", "")
 
+    # DEFAULTS
     engine = request.form.get("engine") or "canary"
     device = request.form.get("device") or "cpu"
+
+    strategy = request.form.get("strategy") or "beam"
+    beam_size = int(request.form.get("beam_size", 5))
+    len_pen = float(request.form.get("len_pen", 1.0))
+    batch_size = int(request.form.get("batch_size", 1))
+    language = request.form.get("language") or "cs"
+    task = request.form.get("task") or "transcribe"
+
+    use_fp16 = request.form.get("fp16") == "on"
+    return_hypotheses = request.form.get("hypotheses") == "on"
 
     if request.method == "POST":
 
         if request.form.get("action") == "clear":
             return redirect(url_for("index", page=page, sort=sort, search=search))
 
+        # upload
         if "file" in request.files:
             file = request.files["file"]
             if file and file.filename:
@@ -61,6 +73,7 @@ def index():
                 file.save(os.path.join(UPLOAD_FOLDER, filename))
                 return redirect(url_for("index", page=1, sort=sort, search=search))
 
+        # transcribe
         if "audio_file" in request.form:
             try:
                 name = secure_filename(request.form.get("audio_file"))
@@ -69,10 +82,22 @@ def index():
                 if not os.path.exists(wav_path):
                     raise ValueError("File does not exist")
 
-                asr = create_asr_engine(engine, device=device)
+                asr = create_asr_engine(
+                    engine,
+                    device=device,
+                    strategy=strategy,
+                    beam_size=beam_size,
+                    len_pen=len_pen,
+                    batch_size=batch_size,
+                    language=language,
+                    task=task,
+                    use_fp16=use_fp16,
+                    return_hypotheses=return_hypotheses
+                )
+                asr.download()
                 transcript = asr.transcribe(wav_path)
 
-                if engine in ("canary", "parakeet"):
+                if return_hypotheses:
                     transcript = transcript.text
 
             except Exception as e:
@@ -90,7 +115,15 @@ def index():
         sort=sort,
         search=search,
         engine=engine,
-        device=device
+        device=device,
+        strategy=strategy,
+        beam_size=beam_size,
+        len_pen=len_pen,
+        batch_size=batch_size,
+        language=language,
+        task=task,
+        use_fp16=use_fp16,
+        return_hypotheses=return_hypotheses
     )
 
 
