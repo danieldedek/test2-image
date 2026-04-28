@@ -20,6 +20,12 @@
             <button>Go</button>
         </form>
 
+        {% if sort == "date" %}
+            <a class="sort-btn" href="{{ url_for('index', sort='name', search=search) }}">Sort: Date ↓</a>
+        {% else %}
+            <a class="sort-btn" href="{{ url_for('index', sort='date', search=search) }}">Sort: A-Z</a>
+        {% endif %}
+
         {% if files %}
         <ul>
             {% for file in files %}
@@ -31,7 +37,7 @@
                     <source src="{{ url_for('uploaded_file', filename=file) }}" type="audio/wav">
                 </audio>
 
-                <form method="POST" id="use-{{ loop.index }}">
+                <form method="POST">
                     <input type="hidden" name="audio_file" value="{{ file }}">
                     <button type="submit" name="action" value="use_file">Use</button>
                 </form>
@@ -45,16 +51,24 @@
         </ul>
 
         <div class="pagination">
-            {% if page > 1 %}
-                <a href="{{ url_for('index', page=page-1, sort=sort, search=search) }}">←</a>
-            {% endif %}
 
-            <span>{{ page }} / {{ total_pages }}</span>
+            <div>
+                {% if page > 1 %}
+                    <a href="{{ url_for('index', page=page-1, sort=sort, search=search) }}">←</a>
+                {% endif %}
 
-            {% if page < total_pages %}
-                <a href="{{ url_for('index', page=page+1, sort=sort, search=search) }}">→</a>
-            {% endif %}
+                {% if page < total_pages %}
+                    <a href="{{ url_for('index', page=page+1, sort=sort, search=search) }}">→</a>
+                {% endif %}
+            </div>
+
+            <div>
+                Page {{ page }} / {{ total_pages }}
+            </div>
+
         </div>
+        {% else %}
+            <p>No files</p>
         {% endif %}
 
     </aside>
@@ -101,12 +115,13 @@
                     <input type="number" name="beam_size" value="{{ beam_size }}">
                 </div>
 
+
                 {% if selected_model == "canary" %}
-                <h3>Canary</h3>
+                <h3>Canary settings</h3>
 
                 <select name="language">
-                    <option value="cs" {% if language=="cs" %}selected{% endif %}>CS</option>
-                    <option value="en" {% if language=="en" %}selected{% endif %}>EN</option>
+                    <option value="cs" {% if language=="cs" %}selected{% endif %}>Czech</option>
+                    <option value="en" {% if language=="en" %}selected{% endif %}>English</option>
                 </select>
 
                 <div class="param">
@@ -120,7 +135,7 @@
                 </div>
 
                 <div class="param">
-                    <label>FP16</label>
+                    <label>FP16 (GPU)</label>
                     <label class="switch">
                         <input type="checkbox" name="fp16" {% if use_fp16 %}checked{% endif %}>
                         <span class="slider"></span>
@@ -138,7 +153,7 @@
 
 
                 {% if selected_model == "parakeet" %}
-                <h3>Parakeet</h3>
+                <h3>Parakeet settings</h3>
 
                 <div class="param">
                     <label>Alpha</label>
@@ -154,12 +169,21 @@
                     <label>Batch size</label>
                     <input type="number" name="batch_size" value="{{ batch_size }}">
                 </div>
+
+                <div class="param">
+                    <label>FP16 (GPU)</label>
+                    <label class="switch">
+                        <input type="checkbox" name="fp16" {% if use_fp16 %}checked{% endif %}>
+                        <span class="slider"></span>
+                    </label>
+                </div>
                 {% endif %}
 
 
                 {% if selected_model == "whisper" %}
-                <h3>Whisper</h3>
+                <h3>Whisper settings</h3>
 
+                <label>Language</label>
                 <input type="text" name="whisper_language" value="{{ whisper_language }}">
 
                 <div class="param">
@@ -173,7 +197,7 @@
                 </div>
 
                 <div class="param">
-                    <label>VAD</label>
+                    <label>VAD filter</label>
                     <label class="switch">
                         <input type="checkbox" name="vad_filter" {% if vad_filter %}checked{% endif %}>
                         <span class="slider"></span>
@@ -189,14 +213,16 @@
 
                 <textarea readonly>{{ transcript }}</textarea>
 
-                <form method="POST" action="/download">
-                    <input type="hidden" name="transcript" value="{{ transcript }}">
-                    <button type="submit">Download</button>
-                </form>
+                <div class="button-row">
+                    <form method="POST" action="/download">
+                        <input type="hidden" name="transcript" value="{{ transcript }}">
+                        <button>Download</button>
+                    </form>
 
-                <form method="POST">
-                    <button name="action" value="clear">Clear</button>
-                </form>
+                    <form method="POST">
+                        <button name="action" value="clear">Clear</button>
+                    </form>
+                </div>
 
             </div>
             {% endif %}
