@@ -28,8 +28,13 @@
                 <form method="POST">
                     <input type="hidden" name="action" value="use_file">
                     <input type="hidden" name="audio_file" value="{{ file }}">
-                    <input type="hidden" name="selected_model" value="{{ selected_model }}">
                     <button type="submit">Use</button>
+                </form>
+
+                <form method="POST" action="{{ url_for('delete_file', filename=file) }}">
+                    <button type="submit" style="background:#c0392b;">
+                        Delete
+                    </button>
                 </form>
 
             </li>
@@ -70,7 +75,7 @@
 
             <form method="POST">
 
-                <input type="hidden" name="action" value="noop">
+                <input type="hidden" name="action" value="transcribe">
                 <input type="hidden" name="selected_model" value="{{ selected_model }}">
 
                 <label>Device</label>
@@ -92,7 +97,7 @@
 
                 {% if selected_model == "canary" %}
 
-                <h3>Canary parameters</h3>
+                <h3>Canary</h3>
 
                 <label>Language</label>
                 <select name="language">
@@ -111,18 +116,19 @@
                 </div>
 
                 <div class="param">
-                    <label>
+                    <label class="switch">
                         <input type="checkbox" name="return_hypotheses"
                                {% if return_hypotheses %}checked{% endif %}>
-                        Return hypotheses
+                        <span class="slider"></span>
                     </label>
+                    Return hypotheses
                 </div>
 
                 {% endif %}
 
                 {% if selected_model == "parakeet" %}
 
-                <h3>Parakeet parameters</h3>
+                <h3>Parakeet</h3>
 
                 <div class="param">
                     <label>Alpha</label>
@@ -142,13 +148,28 @@
                 {% endif %}
 
                 <div class="param">
-                    <label>
+                    <label class="switch">
                         <input type="checkbox" name="fp16" {% if use_fp16 %}checked{% endif %}>
-                        FP16
+                        <span class="slider"></span>
                     </label>
+                    FP16 (GPU acceleration)
                 </div>
 
+                <button type="submit">Use selected model</button>
+
             </form>
+
+            {% if transcript %}
+            <div class="card">
+                <textarea readonly>{{ transcript }}</textarea>
+            </div>
+            {% endif %}
+
+            {% if error %}
+            <div class="card error">
+                {{ error }}
+            </div>
+            {% endif %}
 
         </div>
 
