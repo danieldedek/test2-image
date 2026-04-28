@@ -24,10 +24,14 @@
                     <source src="{{ url_for('uploaded_file', filename=file) }}" type="audio/wav">
                 </audio>
 
-                <button type="submit" form="main-form" name="audio_file" value="{{ file }}">
+                <button
+                    type="submit"
+                    form="main-form"
+                    name="action"
+                    value="use_file"
+                    onclick="document.getElementById('audio_file_input').value='{{ file }}'">
                     Use
                 </button>
-
                 <form method="POST" action="{{ url_for('delete_file', filename=file) }}">
                     <button type="submit" style="background:#c0392b;">Delete</button>
                 </form>
@@ -47,7 +51,7 @@
 
             <form id="main-form" method="POST" enctype="multipart/form-data">
 
-                <input type="hidden" name="action" value="use_file">
+                <input type="hidden" name="audio_file" id="audio_file_input">
 
                 <input type="file" name="file" accept=".wav">
                 <button type="submit" name="action" value="upload">
