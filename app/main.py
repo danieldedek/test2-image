@@ -3,7 +3,6 @@ from utils import create_asr_engine
 from werkzeug.utils import secure_filename
 from io import BytesIO
 import os
-import math
 
 app = Flask(__name__)
 
@@ -39,8 +38,11 @@ def index():
 
     if request.method == "POST" and request.form.get("action") == "upload":
         file = request.files.get("file")
+
         if file and file.filename:
-            file.save(os.path.join(UPLOAD_FOLDER, secure_filename(file.filename)))
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(UPLOAD_FOLDER, filename))
+
         return redirect(url_for("index"))
 
     if request.method == "POST" and request.form.get("action") == "use_file":
@@ -51,37 +53,57 @@ def index():
             if not os.path.exists(path):
                 raise ValueError("File not found")
 
-            asr = create_asr_engine(
-                engine,
-                device=device,
+            if engine == "canary":
+                asr = create_asr_engine(
+                    engine,
+                    device=device,
+                    strategy=strategy,
+                    beam_size=beam_size,
+                    len_pen=len_pen,
+                    language=language,
+                    return_hypotheses=return_hypotheses,
+                    batch_size=batch_size,
+                    use_fp16=use_fp16
+                )
 
-                strategy=strategy,
-                beam_size=beam_size,
+            elif engine == "parakeet":
+                asr = create_asr_engine(
+                    engine,
+                    device=device,
+                    strategy=strategy,
+                    beam_size=beam_size,
+                    alpha=alpha,
+                    beta=beta,
+                    batch_size=batch_size,
+                    use_fp16=use_fp16
+                )
 
-                len_pen=len_pen,
-                language=language,
-                return_hypotheses=return_hypotheses,
+            elif engine == "whisper":
+                asr = create_asr_engine(
+                    engine,
+                    device=device,
+                    beam_size=beam_size,
+                    language=whisper_language,
+                    temperature=temperature,
+                    vad_filter=vad_filter,
+                    best_of=best_of
+                )
 
-                alpha=alpha,
-                beta=beta,
-                batch_size=batch_size,
-                use_fp16=use_fp16,
-
-                whisper_language=whisper_language,
-                temperature=temperature,
-                vad_filter=vad_filter,
-                best_of=best_of
-            )
+            else:
+                raise ValueError("Unknown model")
 
             transcript = asr.transcribe(path)
 
-            if return_hypotheses and engine == "canary":
+            if engine == "canary" and return_hypotheses:
                 transcript = transcript.text
 
         except Exception as e:
-            error = str(e)
+            error = f"Error: {e}"
 
-    files = [f for f in os.listdir(UPLOAD_FOLDER) if f.endswith(".wav")]
+    files = [
+        f for f in os.listdir(UPLOAD_FOLDER)
+        if f.lower().endswith(".wav")
+    ]
 
     return render_template(
         "index.html",
@@ -127,11 +149,13 @@ def download():
 @app.route("/delete/<filename>", methods=["POST"])
 def delete_file(filename):
     path = os.path.join(UPLOAD_FOLDER, filename)
+
     if os.path.exists(path):
         os.remove(path)
+
     return redirect(url_for("index"))
 
 
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    app.run(host="0.0.0.0", port=5000, debug=True)
     
