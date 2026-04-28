@@ -54,8 +54,11 @@ def index():
     page = int(request.args.get("page", 1))
     sort = request.args.get("sort", "date")
     search = request.args.get("search", "")
+    engine = request.args.get("model", "canary")
 
-    engine = request.form.get("selected_model") or "canary"
+    if request.method == "POST":
+        engine = request.form.get("selected_model") or engine
+
     device = request.form.get("device") or "cpu"
     strategy = request.form.get("strategy") or "beam"
 
@@ -82,10 +85,13 @@ def index():
         if file and file.filename:
             filename = secure_filename(file.filename)
             file.save(os.path.join(UPLOAD_FOLDER, filename))
-        return redirect(url_for("index"))
+        return redirect(url_for("index", model=engine))
+
+    if request.method == "POST" and action == "select_model":
+        return redirect(url_for("index", model=engine))
 
     if request.method == "POST" and action == "clear":
-        return redirect(url_for("index", page=page, sort=sort, search=search))
+        return redirect(url_for("index", model=engine, page=page, sort=sort, search=search))
 
     if request.method == "POST" and action == "use_file":
         filename = request.form.get("audio_file")
