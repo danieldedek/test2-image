@@ -1,22 +1,62 @@
 import nemo.collections.asr as nemo_asr
 import torch
+from baseASR import BaseASR
 
 
-class Canary:
-    def __init__(self, device="cpu"):
+class Canary(BaseASR):
+    def __init__(
+        self,
+        device="cpu",
+        strategy="beam",
+        beam_size=5,
+        len_pen=1.0,
+        batch_size=1,
+        language="cs",
+        task="transcribe",
+        return_hypotheses=False,
+        use_fp16=False
+    ):
         self.model_name = "nvidia/canary-180m-flash"
         self.model = None
+
         self.device = device
+        self.strategy = strategy
+        self.beam_size = beam_size
+        self.len_pen = len_pen
+        self.batch_size = batch_size
+        self.language = language
+        self.task = task
+        self.return_hypotheses = return_hypotheses
+        self.use_fp16 = use_fp16
 
     def download(self):
         self.model = nemo_asr.models.ASRModel.from_pretrained(self.model_name)
 
-        if self.device == "cuda" and torch.cuda.is_available():
-            self.model = self.model.to("cuda")
-        else:
-            self.model = self.model.to("cpu")
+        device = "cuda" if self.device == "cuda" and torch.cuda.is_available() else "cpu"
+        self.model = self.model.to(device)
 
-    def transcribe(self, audio_path: str) -> str:
+        if device == "cuda" and self.use_fp16:
+            self.model = self.model.half()
+
+        self.model.change_decoding_strategy({
+            "strategy": self.strategy,
+            "beam_size": self.beam_size,
+            "len_pen": self.len_pen,
+        })
+
+    def transcribe(self, audio_path: str):
         if self.model is None:
             self.download()
-        return self.model.transcribe([audio_path])[0]
+
+        result = self.model.transcribe(
+            [audio_path],
+            batch_size=self.batch_size,
+            language=self.language,
+            task=self.task,
+            return_hypotheses=self.return_hypotheses
+        )
+
+        if self.return_hypotheses:
+            return result[0]
+        else:
+            return result[0]
