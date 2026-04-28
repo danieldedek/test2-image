@@ -1,9 +1,8 @@
 import nemo.collections.asr as nemo_asr
 import torch
-from baseASR import BaseASR
 
 
-class Canary(BaseASR):
+class Canary:
     def __init__(
         self,
         device="cpu",
@@ -12,9 +11,8 @@ class Canary(BaseASR):
         len_pen=1.0,
         batch_size=1,
         language="cs",
-        task="transcribe",
-        return_hypotheses=False,
-        use_fp16=False
+        use_fp16=False,
+        return_hypotheses=False
     ):
         self.model_name = "nvidia/canary-180m-flash"
         self.model = None
@@ -25,9 +23,8 @@ class Canary(BaseASR):
         self.len_pen = len_pen
         self.batch_size = batch_size
         self.language = language
-        self.task = task
-        self.return_hypotheses = return_hypotheses
         self.use_fp16 = use_fp16
+        self.return_hypotheses = return_hypotheses
 
     def download(self):
         self.model = nemo_asr.models.ASRModel.from_pretrained(self.model_name)
@@ -52,11 +49,8 @@ class Canary(BaseASR):
             [audio_path],
             batch_size=self.batch_size,
             language=self.language,
-            task=self.task,
             return_hypotheses=self.return_hypotheses
         )
 
-        if self.return_hypotheses:
-            return result[0]
-        else:
-            return result[0]
+        return result[0]
+        
