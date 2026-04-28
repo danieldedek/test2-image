@@ -54,17 +54,17 @@ def index():
     len_pen = float(request.form.get("len_pen", 1.0))
     batch_size = int(request.form.get("batch_size", 1))
     language = request.form.get("language") or "cs"
-    task = request.form.get("task") or "transcribe"
 
     use_fp16 = request.form.get("fp16") == "on"
-    return_hypotheses = request.form.get("hypotheses") == "on"
+
+    disable_hypotheses = request.form.get("disable_hypotheses") == "on"
+    return_hypotheses = not disable_hypotheses
 
     if request.method == "POST":
 
         if request.form.get("action") == "clear":
             return redirect(url_for("index", page=page, sort=sort, search=search))
 
-        # upload
         if "file" in request.files:
             file = request.files["file"]
             if file and file.filename:
@@ -72,7 +72,6 @@ def index():
                 file.save(os.path.join(UPLOAD_FOLDER, filename))
                 return redirect(url_for("index", page=1, sort=sort, search=search))
 
-        # transcribe
         if "audio_file" in request.form:
             try:
                 name = secure_filename(request.form.get("audio_file"))
@@ -89,11 +88,10 @@ def index():
                     len_pen=len_pen,
                     batch_size=batch_size,
                     language=language,
-                    task=task,
                     use_fp16=use_fp16,
                     return_hypotheses=return_hypotheses
                 )
-                asr.download()
+
                 transcript = asr.transcribe(wav_path)
 
                 if return_hypotheses:
@@ -120,9 +118,8 @@ def index():
         len_pen=len_pen,
         batch_size=batch_size,
         language=language,
-        task=task,
         use_fp16=use_fp16,
-        return_hypotheses=return_hypotheses
+        disable_hypotheses=disable_hypotheses
     )
 
 
@@ -147,3 +144,4 @@ def delete_file(filename):
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
+    
