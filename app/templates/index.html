@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="cs">
+
 <head>
     <meta charset="UTF-8">
     <title>ASR Demo</title>
@@ -14,16 +15,10 @@
 
         <h3>Uploaded files</h3>
 
-        <form method="GET" class="search-form">
-            <input type="text" name="search" value="{{ search }}" placeholder="Search...">
-            <input type="hidden" name="sort" value="{{ sort }}">
-            <button>Go</button>
-        </form>
-
-        {% if files %}
         <ul>
             {% for file in files %}
             <li>
+
                 <strong>{{ file }}</strong>
 
                 <audio controls>
@@ -31,18 +26,18 @@
                 </audio>
 
                 <form method="POST">
-                    <input type="hidden" name="action" value="transcribe">
+                    <input type="hidden" name="action" value="transcribe_file">
                     <input type="hidden" name="audio_file" value="{{ file }}">
                     <button type="submit">Use</button>
                 </form>
 
-                <form method="POST" action="{{ url_for('delete_file', filename=file) }}" style="display:inline;">
+                <form method="POST" action="{{ url_for('delete_file', filename=file) }}">
                     <button type="submit" style="background:#c0392b;">Delete</button>
                 </form>
+
             </li>
             {% endfor %}
         </ul>
-        {% endif %}
 
     </aside>
 
@@ -54,7 +49,7 @@
 
             <form method="POST" enctype="multipart/form-data">
                 <input type="hidden" name="action" value="upload">
-                <input type="file" name="file" accept=".wav">
+                <input type="file" name="file">
                 <button type="submit">Upload</button>
             </form>
 
@@ -62,13 +57,12 @@
 
             <form method="POST">
 
-                <input type="hidden" name="action" value="transcribe">
+                <input type="hidden" name="action" value="transcribe_ui">
 
                 <label>Model</label>
                 <select name="engine">
                     <option value="canary" {% if engine=="canary" %}selected{% endif %}>Canary</option>
                     <option value="parakeet" {% if engine=="parakeet" %}selected{% endif %}>Parakeet</option>
-                    <option value="whisper" {% if engine=="whisper" %}selected{% endif %}>Whisper</option>
                 </select>
 
                 <label>Device</label>
@@ -97,8 +91,8 @@
                 <div class="param">
                     <label>Language</label>
                     <select name="language">
-                        <option value="cs" {% if language=="cs" %}selected{% endif %}>Czech</option>
-                        <option value="en" {% if language=="en" %}selected{% endif %}>English</option>
+                        <option value="cs" {% if language=="cs" %}selected{% endif %}>CS</option>
+                        <option value="en" {% if language=="en" %}selected{% endif %}>EN</option>
                     </select>
                 </div>
 
@@ -108,8 +102,14 @@
                 </div>
 
                 <div class="param">
+                    <label>Batch size</label>
+                    <input type="number" name="batch_size" value="{{ batch_size }}">
+                </div>
+
+                <div class="param">
                     <label>
-                        <input type="checkbox" name="return_hypotheses" {% if return_hypotheses %}checked{% endif %}>
+                        <input type="checkbox" name="return_hypotheses"
+                               {% if return_hypotheses %}checked{% endif %}>
                         Return hypotheses
                     </label>
                 </div>
