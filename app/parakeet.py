@@ -30,9 +30,6 @@ class Parakeet:
         device = "cuda" if self.device == "cuda" and torch.cuda.is_available() else "cpu"
         self.model = self.model.to(device)
 
-        if device == "cuda" and self.use_fp16:
-            self.model = self.model.half()
-
         self.model.change_decoding_strategy({
             "strategy": self.strategy,
             "beam_size": self.beam_size,
