@@ -32,9 +32,7 @@
                 </form>
 
                 <form method="POST" action="{{ url_for('delete_file', filename=file) }}">
-                    <button type="submit" style="background:#c0392b;">
-                        Delete
-                    </button>
+                    <button type="submit" style="background:#c0392b;">Delete</button>
                 </form>
 
             </li>
@@ -59,12 +57,13 @@
 
             <form method="POST">
 
-                <input type="hidden" name="action" value="select_model">
+                <input type="hidden" name="action" value="noop">
 
                 <label>Model</label>
                 <select name="selected_model">
                     <option value="canary" {% if selected_model=="canary" %}selected{% endif %}>Canary</option>
                     <option value="parakeet" {% if selected_model=="parakeet" %}selected{% endif %}>Parakeet</option>
+                    <option value="whisper" {% if selected_model=="whisper" %}selected{% endif %}>Whisper</option>
                 </select>
 
                 <button type="submit">Select model</button>
@@ -75,7 +74,7 @@
 
             <form method="POST">
 
-                <input type="hidden" name="action" value="transcribe">
+                <input type="hidden" name="action" value="use_file">
                 <input type="hidden" name="selected_model" value="{{ selected_model }}">
 
                 <label>Device</label>
@@ -117,8 +116,7 @@
 
                 <div class="param">
                     <label class="switch">
-                        <input type="checkbox" name="return_hypotheses"
-                               {% if return_hypotheses %}checked{% endif %}>
+                        <input type="checkbox" name="return_hypotheses" {% if return_hypotheses %}checked{% endif %}>
                         <span class="slider"></span>
                     </label>
                     Return hypotheses
@@ -147,15 +145,32 @@
 
                 {% endif %}
 
+                {% if selected_model == "whisper" %}
+
+                <h3>Whisper</h3>
+
+                <label>Language</label>
+                <input type="text" name="whisper_language" value="{{ whisper_language }}">
+
                 <div class="param">
-                    <label class="switch">
-                        <input type="checkbox" name="fp16" {% if use_fp16 %}checked{% endif %}>
-                        <span class="slider"></span>
-                    </label>
-                    FP16 (GPU acceleration)
+                    <label>Temperature</label>
+                    <input type="number" step="0.1" name="temperature" value="{{ temperature }}">
                 </div>
 
-                <button type="submit">Use selected model</button>
+                <div class="param">
+                    <label>Best of</label>
+                    <input type="number" name="best_of" value="{{ best_of }}">
+                </div>
+
+                <div class="param">
+                    <label class="switch">
+                        <input type="checkbox" name="vad_filter" {% if vad_filter %}checked{% endif %}>
+                        <span class="slider"></span>
+                    </label>
+                    VAD filter
+                </div>
+
+                {% endif %}
 
             </form>
 
