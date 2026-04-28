@@ -14,6 +14,13 @@
 
         <h3>Uploaded files</h3>
 
+        <form method="GET" class="search-form">
+            <input type="text" name="search" value="{{ search }}" placeholder="Search...">
+            <input type="hidden" name="sort" value="{{ sort }}">
+            <button>Go</button>
+        </form>
+
+        {% if files %}
         <ul>
             {% for file in files %}
             <li>
@@ -24,14 +31,11 @@
                     <source src="{{ url_for('uploaded_file', filename=file) }}" type="audio/wav">
                 </audio>
 
-                <button
-                    type="submit"
-                    form="main-form"
-                    name="action"
-                    value="use_file"
-                    onclick="document.getElementById('audio_file_input').value='{{ file }}'">
-                    Use
-                </button>
+                <form method="POST" id="use-{{ loop.index }}">
+                    <input type="hidden" name="audio_file" value="{{ file }}">
+                    <button type="submit" name="action" value="use_file">Use</button>
+                </form>
+
                 <form method="POST" action="{{ url_for('delete_file', filename=file) }}">
                     <button type="submit" style="background:#c0392b;">Delete</button>
                 </form>
@@ -39,6 +43,19 @@
             </li>
             {% endfor %}
         </ul>
+
+        <div class="pagination">
+            {% if page > 1 %}
+                <a href="{{ url_for('index', page=page-1, sort=sort, search=search) }}">←</a>
+            {% endif %}
+
+            <span>{{ page }} / {{ total_pages }}</span>
+
+            {% if page < total_pages %}
+                <a href="{{ url_for('index', page=page+1, sort=sort, search=search) }}">→</a>
+            {% endif %}
+        </div>
+        {% endif %}
 
     </aside>
 
@@ -49,14 +66,10 @@
 
             <h2>ASR Demo</h2>
 
-            <form id="main-form" method="POST" enctype="multipart/form-data">
-
-                <input type="hidden" name="audio_file" id="audio_file_input">
+            <form method="POST" enctype="multipart/form-data">
 
                 <input type="file" name="file" accept=".wav">
-                <button type="submit" name="action" value="upload">
-                    Upload
-                </button>
+                <button type="submit" name="action" value="upload">Upload</button>
 
                 <hr>
 
@@ -67,9 +80,7 @@
                     <option value="whisper" {% if selected_model=="whisper" %}selected{% endif %}>Whisper</option>
                 </select>
 
-                <button type="submit" name="action" value="select_model">
-                    Select model
-                </button>
+                <button type="submit" name="action" value="select_model">Select model</button>
 
                 <hr>
 
@@ -87,18 +98,15 @@
 
                 <div class="param">
                     <label>Beam size</label>
-                    <input type="number" name="beam_size" value="{{ beam_size }}" min="1" max="10">
+                    <input type="number" name="beam_size" value="{{ beam_size }}">
                 </div>
 
-
                 {% if selected_model == "canary" %}
+                <h3>Canary</h3>
 
-                <h3>Canary settings</h3>
-
-                <label>Language</label>
                 <select name="language">
-                    <option value="cs" {% if language=="cs" %}selected{% endif %}>Czech</option>
-                    <option value="en" {% if language=="en" %}selected{% endif %}>English</option>
+                    <option value="cs" {% if language=="cs" %}selected{% endif %}>CS</option>
+                    <option value="en" {% if language=="en" %}selected{% endif %}>EN</option>
                 </select>
 
                 <div class="param">
@@ -108,11 +116,11 @@
 
                 <div class="param">
                     <label>Batch size</label>
-                    <input type="number" name="batch_size" value="{{ batch_size }}" min="1" max="16">
+                    <input type="number" name="batch_size" value="{{ batch_size }}">
                 </div>
 
                 <div class="param">
-                    <label>FP16 (GPU)</label>
+                    <label>FP16</label>
                     <label class="switch">
                         <input type="checkbox" name="fp16" {% if use_fp16 %}checked{% endif %}>
                         <span class="slider"></span>
@@ -126,21 +134,19 @@
                         <span class="slider"></span>
                     </label>
                 </div>
-
                 {% endif %}
 
 
                 {% if selected_model == "parakeet" %}
-
-                <h3>Parakeet settings</h3>
+                <h3>Parakeet</h3>
 
                 <div class="param">
-                    <label>Alpha (LM weight)</label>
+                    <label>Alpha</label>
                     <input type="number" step="0.1" name="alpha" value="{{ alpha }}">
                 </div>
 
                 <div class="param">
-                    <label>Beta (word bonus)</label>
+                    <label>Beta</label>
                     <input type="number" step="0.1" name="beta" value="{{ beta }}">
                 </div>
 
@@ -148,23 +154,12 @@
                     <label>Batch size</label>
                     <input type="number" name="batch_size" value="{{ batch_size }}">
                 </div>
-
-                <div class="param">
-                    <label>FP16 (GPU)</label>
-                    <label class="switch">
-                        <input type="checkbox" name="fp16" {% if use_fp16 %}checked{% endif %}>
-                        <span class="slider"></span>
-                    </label>
-                </div>
-
                 {% endif %}
 
 
                 {% if selected_model == "whisper" %}
+                <h3>Whisper</h3>
 
-                <h3>Whisper settings</h3>
-
-                <label>Language</label>
                 <input type="text" name="whisper_language" value="{{ whisper_language }}">
 
                 <div class="param">
@@ -178,13 +173,12 @@
                 </div>
 
                 <div class="param">
-                    <label>VAD filter</label>
+                    <label>VAD</label>
                     <label class="switch">
                         <input type="checkbox" name="vad_filter" {% if vad_filter %}checked{% endif %}>
                         <span class="slider"></span>
                     </label>
                 </div>
-
                 {% endif %}
 
             </form>
@@ -192,7 +186,18 @@
 
             {% if transcript %}
             <div class="card">
+
                 <textarea readonly>{{ transcript }}</textarea>
+
+                <form method="POST" action="/download">
+                    <input type="hidden" name="transcript" value="{{ transcript }}">
+                    <button type="submit">Download</button>
+                </form>
+
+                <form method="POST">
+                    <button name="action" value="clear">Clear</button>
+                </form>
+
             </div>
             {% endif %}
 
