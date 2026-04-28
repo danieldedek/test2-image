@@ -1,15 +1,13 @@
 from flask import Flask, render_template, request, send_from_directory, send_file, redirect, url_for
 from utils import create_asr_engine
-from io import BytesIO
 from werkzeug.utils import secure_filename
+from io import BytesIO
 import os
 import math
 
 app = Flask(__name__)
 
 UPLOAD_FOLDER = "/app/uploads"
-FILES_PER_PAGE = 10
-
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 
@@ -18,120 +16,82 @@ def index():
     transcript = None
     error = None
 
-    page = int(request.args.get("page", 1))
-    sort = request.args.get("sort", "date")
-    search = request.args.get("search", "")
-
-    selected_model = request.form.get("selected_model") or request.args.get("selected_model") or "canary"
+    selected_model = request.form.get("selected_model") or "canary"
+    engine = selected_model
 
     device = request.form.get("device") or "cpu"
     strategy = request.form.get("strategy") or "beam"
     beam_size = int(request.form.get("beam_size", 5))
-    use_fp16 = request.form.get("fp16") == "on"
 
     len_pen = float(request.form.get("len_pen", 1.0))
     language = request.form.get("language") or "cs"
     return_hypotheses = request.form.get("return_hypotheses") == "on"
-    batch_size = int(request.form.get("batch_size", 1))
 
     alpha = float(request.form.get("alpha", 0.5))
     beta = float(request.form.get("beta", 1.0))
+    batch_size = int(request.form.get("batch_size", 1))
+    use_fp16 = request.form.get("fp16") == "on"
 
-    if request.method == "POST":
+    whisper_language = request.form.get("whisper_language") or None
+    temperature = float(request.form.get("temperature", 0.0))
+    vad_filter = request.form.get("vad_filter") == "on"
+    best_of = int(request.form.get("best_of", 5))
 
-        action = request.form.get("action")
+    if request.method == "POST" and request.form.get("action") == "upload":
+        file = request.files.get("file")
+        if file and file.filename:
+            file.save(os.path.join(UPLOAD_FOLDER, secure_filename(file.filename)))
+        return redirect(url_for("index"))
 
-        if action == "select_model":
-            return redirect(url_for(
-                "index",
-                selected_model=selected_model,
-                page=page,
-                sort=sort,
-                search=search
-            ))
+    if request.method == "POST" and request.form.get("action") == "use_file":
+        try:
+            filename = secure_filename(request.form.get("audio_file"))
+            path = os.path.join(UPLOAD_FOLDER, filename)
 
-        if action == "upload" and "file" in request.files:
-            file = request.files["file"]
+            if not os.path.exists(path):
+                raise ValueError("File not found")
 
-            if file and file.filename:
-                filename = secure_filename(file.filename)
-                file.save(os.path.join(UPLOAD_FOLDER, filename))
+            asr = create_asr_engine(
+                engine,
+                device=device,
 
-            return redirect(url_for("index", selected_model=selected_model))
+                strategy=strategy,
+                beam_size=beam_size,
 
-        if action == "use_file":
+                len_pen=len_pen,
+                language=language,
+                return_hypotheses=return_hypotheses,
 
-            name = request.form.get("audio_file")
-            wav_path = os.path.join(UPLOAD_FOLDER, secure_filename(name))
+                alpha=alpha,
+                beta=beta,
+                batch_size=batch_size,
+                use_fp16=use_fp16,
 
-            if not os.path.exists(wav_path):
-                error = "File not found"
-            else:
-                try:
+                whisper_language=whisper_language,
+                temperature=temperature,
+                vad_filter=vad_filter,
+                best_of=best_of
+            )
 
-                    if selected_model == "parakeet":
-                        asr = create_asr_engine(
-                            "parakeet",
-                            device=device,
-                            strategy=strategy,
-                            beam_size=beam_size,
-                            alpha=alpha,
-                            beta=beta,
-                            batch_size=batch_size,
-                            use_fp16=use_fp16
-                        )
+            transcript = asr.transcribe(path)
 
-                    else:
-                        asr = create_asr_engine(
-                            "canary",
-                            device=device,
-                            strategy=strategy,
-                            beam_size=beam_size,
-                            len_pen=len_pen,
-                            language=language,
-                            return_hypotheses=return_hypotheses,
-                            batch_size=batch_size,
-                            use_fp16=use_fp16
-                        )
+            if return_hypotheses and engine == "canary":
+                transcript = transcript.text
 
-                    result = asr.transcribe(wav_path)
-                    transcript = result
-
-                    if selected_model == "canary" and return_hypotheses:
-                        try:
-                            transcript = result.text
-                        except:
-                            transcript = str(result)
-
-                except Exception as e:
-                    error = str(e)
+        except Exception as e:
+            error = str(e)
 
     files = [f for f in os.listdir(UPLOAD_FOLDER) if f.endswith(".wav")]
-
-    if search:
-        files = [f for f in files if search.lower() in f.lower()]
-
-    if sort == "name":
-        files.sort()
-    else:
-        files.sort(key=lambda f: os.path.getmtime(os.path.join(UPLOAD_FOLDER, f)), reverse=True)
-
-    total_pages = max(1, math.ceil(len(files) / FILES_PER_PAGE))
-    files = files[(page - 1) * FILES_PER_PAGE: page * FILES_PER_PAGE]
 
     return render_template(
         "index.html",
 
         files=files,
-        page=page,
-        total_pages=total_pages,
-        sort=sort,
-        search=search,
-
         transcript=transcript,
         error=error,
 
         selected_model=selected_model,
+        engine=engine,
 
         device=device,
         strategy=strategy,
@@ -140,12 +100,16 @@ def index():
         len_pen=len_pen,
         language=language,
         return_hypotheses=return_hypotheses,
-        batch_size=batch_size,
 
         alpha=alpha,
         beta=beta,
+        batch_size=batch_size,
+        use_fp16=use_fp16,
 
-        use_fp16=use_fp16
+        whisper_language=whisper_language,
+        temperature=temperature,
+        vad_filter=vad_filter,
+        best_of=best_of
     )
 
 
@@ -169,5 +133,5 @@ def delete_file(filename):
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(debug=True, host="0.0.0.0", port=5000)
     
