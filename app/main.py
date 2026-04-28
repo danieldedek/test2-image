@@ -80,11 +80,9 @@ def index():
 
     if request.method == "POST" and action == "upload":
         file = request.files.get("file")
-
         if file and file.filename:
             filename = secure_filename(file.filename)
             file.save(os.path.join(UPLOAD_FOLDER, filename))
-
         return redirect(url_for("index", page=1, sort=sort, search=search))
 
     if request.method == "POST" and action == "use_file":
