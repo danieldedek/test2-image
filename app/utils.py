@@ -3,11 +3,8 @@ from parakeet import Parakeet
 from canary import Canary
 
 
-def create_asr_engine(
-    engine_name: str,
-    device: str = "cpu",
-    **kwargs
-):
+def create_asr_engine(engine_name: str, device: str = "cpu", **kwargs):
+
     engines = {
         "whisper": Whisper,
         "parakeet": Parakeet,
