@@ -15,16 +15,18 @@
         <h3>Uploaded files</h3>
 
         <form method="GET" class="search-form">
-            <input type="text" name="search" value="{{ search }}" placeholder="Search .wav...">
+            <input type="text" name="search" value="{{ search }}" placeholder="Search .wav files">
             <input type="hidden" name="sort" value="{{ sort }}">
             <button type="submit">Search</button>
         </form>
 
-        {% if sort == "date" %}
-            <a href="{{ url_for('index', sort='name', search=search) }}">Sort: Date ↓</a>
-        {% else %}
-            <a href="{{ url_for('index', sort='date', search=search) }}">Sort: A-Z</a>
-        {% endif %}
+        <div style="margin: 10px 0;">
+            {% if sort == "date" %}
+                <a href="{{ url_for('index', sort='name', search=search) }}">Sort: Date ↓</a>
+            {% else %}
+                <a href="{{ url_for('index', sort='date', search=search) }}">Sort: A-Z</a>
+            {% endif %}
+        </div>
 
         <hr>
 
@@ -41,18 +43,42 @@
 
                 <form method="POST" style="display:inline;">
                     <input type="hidden" name="audio_file" value="{{ file }}">
-                    <input type="hidden" name="engine" value="{{ engine }}">
+                    <input type="hidden" name="selected_model" value="{{ selected_model }}">
                     <input type="hidden" name="device" value="{{ device }}">
-                    <button type="submit">Use</button>
+                    <input type="hidden" name="strategy" value="{{ strategy }}">
+
+                    <input type="hidden" name="beam_size" value="{{ beam_size }}">
+                    <input type="hidden" name="batch_size" value="{{ batch_size }}">
+                    <input type="hidden" name="len_pen" value="{{ len_pen }}">
+                    <input type="hidden" name="language" value="{{ language }}">
+                    <input type="hidden" name="return_hypotheses" value="{{ return_hypotheses }}">
+
+                    <input type="hidden" name="alpha" value="{{ alpha }}">
+                    <input type="hidden" name="beta" value="{{ beta }}">
+
+                    <input type="hidden" name="whisper_language" value="{{ whisper_language }}">
+                    <input type="hidden" name="temperature" value="{{ temperature }}">
+                    <input type="hidden" name="best_of" value="{{ best_of }}">
+                    <input type="hidden" name="vad_filter" value="{{ vad_filter }}">
+
+                    <button type="submit" name="action" value="use_file">
+                        Use
+                    </button>
                 </form>
 
                 <form method="POST" action="{{ url_for('delete_file', filename=file) }}" style="display:inline;">
-                    <button type="submit" style="background:#c0392b;">Delete</button>
+                    <button type="submit" style="background:#c0392b;">
+                        Delete
+                    </button>
                 </form>
 
             </li>
             {% endfor %}
         </ul>
+
+        {% else %}
+            <p>No files found</p>
+        {% endif %}
 
         <div class="pagination">
 
@@ -68,11 +94,8 @@
 
         </div>
 
-        {% else %}
-            <p>No files found</p>
-        {% endif %}
-
     </aside>
+
 
     <main class="main">
 
@@ -82,17 +105,19 @@
 
             <form method="POST" enctype="multipart/form-data">
                 <input type="file" name="file" accept=".wav">
-                <button type="submit">Upload</button>
+                <button type="submit" name="action" value="upload">
+                    Upload
+                </button>
             </form>
 
             <hr>
 
             <form method="POST">
 
-                <select name="engine">
-                    <option value="canary" {% if engine == "canary" %}selected{% endif %}>canary</option>
-                    <option value="parakeet" {% if engine == "parakeet" %}selected{% endif %}>parakeet</option>
-                    <option value="whisper" {% if engine == "whisper" %}selected{% endif %}>whisper</option>
+                <select name="selected_model">
+                    <option value="canary" {% if selected_model == "canary" %}selected{% endif %}>canary</option>
+                    <option value="parakeet" {% if selected_model == "parakeet" %}selected{% endif %}>parakeet</option>
+                    <option value="whisper" {% if selected_model == "whisper" %}selected{% endif %}>whisper</option>
                 </select>
 
                 <select name="device">
@@ -100,9 +125,16 @@
                     <option value="cuda" {% if device == "cuda" %}selected{% endif %}>GPU</option>
                 </select>
 
+                <select name="strategy">
+                    <option value="beam" {% if strategy == "beam" %}selected{% endif %}>Beam</option>
+                    <option value="greedy" {% if strategy == "greedy" %}selected{% endif %}>Greedy</option>
+                </select>
+
                 <button type="submit">Apply</button>
 
             </form>
+
+            <hr>
 
             {% if transcript %}
             <div class="card">
@@ -117,7 +149,9 @@
                     </form>
 
                     <form method="POST">
-                        <button type="submit" name="action" value="clear">Clear</button>
+                        <button type="submit" name="action" value="clear">
+                            Clear
+                        </button>
                     </form>
 
                 </div>
