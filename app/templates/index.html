@@ -13,7 +13,7 @@
 
     <aside class="sidebar">
 
-        <h3>Uploaded files</h3>
+        <h3>Files</h3>
 
         <ul>
             {% for file in files %}
@@ -22,17 +22,14 @@
                 <strong>{{ file }}</strong>
 
                 <audio controls>
-                    <source src="{{ url_for('uploaded_file', filename=file) }}" type="audio/wav">
+                    <source src="{{ url_for('uploaded_file', filename=file) }}">
                 </audio>
 
                 <form method="POST">
-                    <input type="hidden" name="action" value="transcribe_file">
+                    <input type="hidden" name="action" value="use_file">
                     <input type="hidden" name="audio_file" value="{{ file }}">
+                    <input type="hidden" name="selected_model" value="{{ selected_model }}">
                     <button type="submit">Use</button>
-                </form>
-
-                <form method="POST" action="{{ url_for('delete_file', filename=file) }}">
-                    <button type="submit" style="background:#c0392b;">Delete</button>
                 </form>
 
             </li>
@@ -57,21 +54,30 @@
 
             <form method="POST">
 
-                <input type="hidden" name="action" value="transcribe_ui">
+                <input type="hidden" name="action" value="select_model">
 
                 <label>Model</label>
-                <select name="engine">
-                    <option value="canary" {% if engine=="canary" %}selected{% endif %}>Canary</option>
-                    <option value="parakeet" {% if engine=="parakeet" %}selected{% endif %}>Parakeet</option>
+                <select name="selected_model">
+                    <option value="canary" {% if selected_model=="canary" %}selected{% endif %}>Canary</option>
+                    <option value="parakeet" {% if selected_model=="parakeet" %}selected{% endif %}>Parakeet</option>
                 </select>
+
+                <button type="submit">Select model</button>
+
+            </form>
+
+            <hr>
+
+            <form method="POST">
+
+                <input type="hidden" name="action" value="noop">
+                <input type="hidden" name="selected_model" value="{{ selected_model }}">
 
                 <label>Device</label>
                 <select name="device">
                     <option value="cpu" {% if device=="cpu" %}selected{% endif %}>CPU</option>
                     <option value="cuda" {% if device=="cuda" %}selected{% endif %}>GPU</option>
                 </select>
-
-                <hr>
 
                 <label>Strategy</label>
                 <select name="strategy">
@@ -84,17 +90,15 @@
                     <input type="number" name="beam_size" value="{{ beam_size }}">
                 </div>
 
-                {% if engine == "canary" %}
+                {% if selected_model == "canary" %}
 
-                <h3>Canary settings</h3>
+                <h3>Canary parameters</h3>
 
-                <div class="param">
-                    <label>Language</label>
-                    <select name="language">
-                        <option value="cs" {% if language=="cs" %}selected{% endif %}>CS</option>
-                        <option value="en" {% if language=="en" %}selected{% endif %}>EN</option>
-                    </select>
-                </div>
+                <label>Language</label>
+                <select name="language">
+                    <option value="cs" {% if language=="cs" %}selected{% endif %}>CS</option>
+                    <option value="en" {% if language=="en" %}selected{% endif %}>EN</option>
+                </select>
 
                 <div class="param">
                     <label>Length penalty</label>
@@ -116,9 +120,9 @@
 
                 {% endif %}
 
-                {% if engine == "parakeet" %}
+                {% if selected_model == "parakeet" %}
 
-                <h3>Parakeet settings</h3>
+                <h3>Parakeet parameters</h3>
 
                 <div class="param">
                     <label>Alpha</label>
@@ -144,21 +148,7 @@
                     </label>
                 </div>
 
-                <button type="submit">Transcribe</button>
-
             </form>
-
-            {% if transcript %}
-            <div class="card">
-                <textarea readonly>{{ transcript }}</textarea>
-            </div>
-            {% endif %}
-
-            {% if error %}
-            <div class="card error">
-                {{ error }}
-            </div>
-            {% endif %}
 
         </div>
 
