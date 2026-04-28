@@ -5,7 +5,6 @@
     <title>ASR Demo</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-
 <body>
 
 <div class="layout">
@@ -14,27 +13,32 @@
 
         <h3>Uploaded files</h3>
 
+        <form method="GET" class="search-form">
+            <input type="text" name="search" value="{{ search }}" placeholder="Search...">
+            <input type="hidden" name="sort" value="{{ sort }}">
+            <button>Go</button>
+        </form>
+
         {% if files %}
-        <ul>
-            {% for file in files %}
-            <li>
-                <strong>{{ file }}</strong>
+            <ul>
+                {% for file in files %}
+                <li>
+                    <strong>{{ file }}</strong>
 
-                <audio controls>
-                    <source src="{{ url_for('uploaded_file', filename=file) }}" type="audio/wav">
-                </audio>
+                    <audio controls>
+                        <source src="{{ url_for('uploaded_file', filename=file) }}" type="audio/wav">
+                    </audio>
 
-                <form method="POST" id="use-{{ file }}" style="display:inline;">
-                    <input type="hidden" name="audio_file" value="{{ file }}">
-                    <button type="submit">Use</button>
-                </form>
+                    <button type="submit" form="main-form" name="audio_file" value="{{ file }}">
+                        Use
+                    </button>
 
-                <form method="POST" action="{{ url_for('delete_file', filename=file) }}" style="display:inline;">
-                    <button type="submit" style="background:#c0392b;">Delete</button>
-                </form>
-            </li>
-            {% endfor %}
-        </ul>
+                    <form method="POST" action="{{ url_for('delete_file', filename=file)" style="display:inline;">
+                        <button type="submit" style="background:#c0392b;">Delete</button>
+                    </form>
+                </li>
+                {% endfor %}
+            </ul>
         {% endif %}
 
     </aside>
@@ -44,23 +48,19 @@
 
             <h2>ASR Demo</h2>
 
-            <form method="POST" enctype="multipart/form-data">
+            <form id="main-form" method="POST" enctype="multipart/form-data">
+
                 <input type="file" name="file" accept=".wav">
                 <button type="submit">Upload</button>
-            </form>
 
-            <hr>
+                <hr>
 
-            <form method="POST" enctype="multipart/form-data">
-
-                <label>Model</label>
                 <select name="engine">
-                    <option value="canary" {% if engine=="canary" %}selected{% endif %}>Canary</option>
-                    <option value="parakeet" {% if engine=="parakeet" %}selected{% endif %}>Parakeet</option>
-                    <option value="whisper" {% if engine=="whisper" %}selected{% endif %}>Whisper</option>
+                    <option value="canary" {% if engine=="canary" %}selected{% endif %}>canary</option>
+                    <option value="parakeet" {% if engine=="parakeet" %}selected{% endif %}>parakeet</option>
+                    <option value="whisper" {% if engine=="whisper" %}selected{% endif %}>whisper</option>
                 </select>
 
-                <label>Device</label>
                 <select name="device">
                     <option value="cpu" {% if device=="cpu" %}selected{% endif %}>CPU</option>
                     <option value="cuda" {% if device=="cuda" %}selected{% endif %}>GPU</option>
@@ -68,59 +68,48 @@
 
                 <hr>
 
-                <label>Strategy</label>
+                <h3>Canary settings</h3>
+
+                <select name="language">
+                    <option value="cs" {% if language=="cs" %}selected{% endif %}>Czech</option>
+                    <option value="en" {% if language=="en" %}selected{% endif %}>English</option>
+                </select>
+
                 <select name="strategy">
                     <option value="greedy" {% if strategy=="greedy" %}selected{% endif %}>Greedy</option>
                     <option value="beam" {% if strategy=="beam" %}selected{% endif %}>Beam</option>
                 </select>
 
-                <label>Beam size</label>
-                <input type="number" name="beam_size" value="{{ beam_size }}">
-
-                {% if engine == "canary" %}
-
-                    <h3>Canary settings</h3>
-
-                    <label>Language</label>
-                    <select name="language">
-                        <option value="cs" {% if language=="cs" %}selected{% endif %}>Czech</option>
-                        <option value="en" {% if language=="en" %}selected{% endif %}>English</option>
-                    </select>
-
-                    <label>Length penalty</label>
-                    <input type="number" step="0.1" name="len_pen" value="{{ len_pen }}">
-
-                    <div class="param">
-                        <label>Return hypotheses</label>
-                        <label class="switch">
-                            <input type="checkbox" name="return_hypotheses" {% if return_hypotheses %}checked{% endif %}>
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-
-                {% endif %}
-
-                {% if engine == "parakeet" %}
-
-                    <h3>Parakeet settings</h3>
-
-                    <label>Alpha</label>
-                    <input type="number" step="0.1" name="alpha" value="{{ alpha }}">
-
-                    <label>Beta</label>
-                    <input type="number" step="0.1" name="beta" value="{{ beta }}">
-
-                {% endif %}
+                <div class="param">
+                    <label>Beam size (vyšší = přesnější, pomalejší)</label>
+                    <input type="number" name="beam_size" value="{{ beam_size }}" min="1" max="10">
+                </div>
 
                 <div class="param">
-                    <label>FP16 (GPU acceleration)</label>
+                    <label>Length penalty (1.0 = neutrální)</label>
+                    <input type="number" step="0.1" name="len_pen" value="{{ len_pen }}">
+                </div>
+
+                <div class="param">
+                    <label>Batch size (vyšší = rychlejší na GPU)</label>
+                    <input type="number" name="batch_size" value="{{ batch_size }}" min="1" max="16">
+                </div>
+
+                <div class="param">
+                    <label>FP16 (rychlejší na GPU)</label>
                     <label class="switch">
                         <input type="checkbox" name="fp16" {% if use_fp16 %}checked{% endif %}>
                         <span class="slider"></span>
                     </label>
                 </div>
 
-                <button type="submit">Transcribe</button>
+                <div class="param">
+                    <label>Disable hypotheses (zapni = jen čistý text)</label>
+                    <label class="switch">
+                        <input type="checkbox" name="disable_hypotheses" {% if disable_hypotheses %}checked{% endif %}>
+                        <span class="slider"></span>
+                    </label>
+                </div>
 
             </form>
 
