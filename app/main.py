@@ -10,6 +10,16 @@ UPLOAD_FOLDER = "/app/uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 
+def get_int(name, default):
+    value = request.form.get(name)
+    return int(value) if value not in (None, "") else default
+
+
+def get_float(name, default):
+    value = request.form.get(name)
+    return float(value) if value not in (None, "") else default
+
+
 @app.route("/", methods=["GET", "POST"])
 def index():
     transcript = None
@@ -20,21 +30,22 @@ def index():
 
     device = request.form.get("device") or "cpu"
     strategy = request.form.get("strategy") or "beam"
-    beam_size = int(request.form.get("beam_size", 5))
 
-    len_pen = float(request.form.get("len_pen", 1.0))
+    beam_size = get_int("beam_size", 5)
+    batch_size = get_int("batch_size", 1)
+    use_fp16 = request.form.get("fp16") == "on"
+
+    len_pen = get_float("len_pen", 1.0)
     language = request.form.get("language") or "cs"
     return_hypotheses = request.form.get("return_hypotheses") == "on"
 
-    alpha = float(request.form.get("alpha", 0.5))
-    beta = float(request.form.get("beta", 1.0))
-    batch_size = int(request.form.get("batch_size", 1))
-    use_fp16 = request.form.get("fp16") == "on"
+    alpha = get_float("alpha", 0.5)
+    beta = get_float("beta", 1.0)
 
     whisper_language = request.form.get("whisper_language") or None
-    temperature = float(request.form.get("temperature", 0.0))
+    temperature = get_float("temperature", 0.0)
+    best_of = get_int("best_of", 5)
     vad_filter = request.form.get("vad_filter") == "on"
-    best_of = int(request.form.get("best_of", 5))
 
     action = request.form.get("action")
 
@@ -142,8 +153,8 @@ def index():
 
         whisper_language=whisper_language,
         temperature=temperature,
-        vad_filter=vad_filter,
-        best_of=best_of
+        best_of=best_of,
+        vad_filter=vad_filter
     )
 
 
