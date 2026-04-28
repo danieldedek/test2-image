@@ -20,11 +20,9 @@
             <button>Go</button>
         </form>
 
-        <a class="sort-btn" href="{{ url_for('index', sort='date', search=search) }}">
-            Sort by date
-        </a>
-        <a class="sort-btn" href="{{ url_for('index', sort='name', search=search) }}">
-            Sort by name
+        <a class="sort-btn"
+           href="{{ url_for('index', sort='name' if sort=='date' else 'date', search=search) }}">
+            Sort by {{ 'name' if sort=='date' else 'date' }}
         </a>
 
         {% if files %}
@@ -43,10 +41,7 @@
                     form="main-form"
                     name="action"
                     value="use_file"
-                    onclick="
-                        document.getElementById('audio_file_input').value='{{ file }}';
-                        document.getElementById('model_input').value=document.getElementById('model_select').value;
-                    ">
+                    onclick="document.getElementById('audio_file_input').value='{{ file }}'">
                     Use
                 </button>
 
@@ -61,13 +56,13 @@
 
         <div class="pagination">
             {% if page > 1 %}
-                <a href="{{ url_for('index', page=page-1, sort=sort, search=search) }}">← Prev</a>
+                <a href="{{ url_for('index', page=page-1, sort=sort, search=search) }}">←</a>
             {% endif %}
 
-            <span>Page {{ page }} / {{ total_pages }}</span>
+            <span>{{ page }} / {{ total_pages }}</span>
 
             {% if page < total_pages %}
-                <a href="{{ url_for('index', page=page+1, sort=sort, search=search) }}">Next →</a>
+                <a href="{{ url_for('index', page=page+1, sort=sort, search=search) }}">→</a>
             {% endif %}
         </div>
 
@@ -83,25 +78,18 @@
             <form id="main-form" method="POST" enctype="multipart/form-data">
 
                 <input type="hidden" name="audio_file" id="audio_file_input">
-                <input type="hidden" name="selected_model" id="model_input" value="{{ selected_model }}">
 
                 <input type="file" name="file" accept=".wav">
-                <button type="submit" name="action" value="upload">
-                    Upload
-                </button>
+                <button type="submit" name="action" value="upload">Upload</button>
 
                 <hr>
 
                 <label>Model</label>
-                <select name="selected_model" id="model_select">
+                <select name="selected_model">
                     <option value="canary" {% if selected_model=="canary" %}selected{% endif %}>Canary</option>
                     <option value="parakeet" {% if selected_model=="parakeet" %}selected{% endif %}>Parakeet</option>
                     <option value="whisper" {% if selected_model=="whisper" %}selected{% endif %}>Whisper</option>
                 </select>
-
-                <button type="submit" name="action" value="select_model">
-                    Select model
-                </button>
 
                 <hr>
 
@@ -119,119 +107,37 @@
 
                 <div class="param">
                     <label>Beam size</label>
-                    <input type="number" name="beam_size" value="{{ beam_size }}" min="1" max="10">
+                    <input type="number" name="beam_size" value="{{ beam_size }}">
                 </div>
-
 
                 {% if selected_model == "canary" %}
-
-                <h3>Canary settings</h3>
-
-                <label>Language</label>
-                <select name="language">
-                    <option value="cs" {% if language=="cs" %}selected{% endif %}>Czech</option>
-                    <option value="en" {% if language=="en" %}selected{% endif %}>English</option>
-                </select>
-
-                <div class="param">
-                    <label>Length penalty</label>
-                    <input type="number" step="0.1" name="len_pen" value="{{ len_pen }}">
-                </div>
-
-                <div class="param">
-                    <label>Batch size</label>
-                    <input type="number" name="batch_size" value="{{ batch_size }}">
-                </div>
-
-                <div class="param">
-                    <label>FP16</label>
-                    <label class="switch">
-                        <input type="checkbox" name="fp16" {% if use_fp16 %}checked{% endif %}>
-                        <span class="slider"></span>
-                    </label>
-                </div>
-
-                <div class="param">
-                    <label>Return hypotheses</label>
-                    <label class="switch">
-                        <input type="checkbox" name="return_hypotheses" {% if return_hypotheses %}checked{% endif %}>
-                        <span class="slider"></span>
-                    </label>
-                </div>
-
+                <h3>Canary</h3>
+                <input name="len_pen" value="{{ len_pen }}">
                 {% endif %}
-
 
                 {% if selected_model == "parakeet" %}
-
-                <h3>Parakeet settings</h3>
-
-                <div class="param">
-                    <label>Alpha</label>
-                    <input type="number" step="0.1" name="alpha" value="{{ alpha }}">
-                </div>
-
-                <div class="param">
-                    <label>Beta</label>
-                    <input type="number" step="0.1" name="beta" value="{{ beta }}">
-                </div>
-
-                <div class="param">
-                    <label>Batch size</label>
-                    <input type="number" name="batch_size" value="{{ batch_size }}">
-                </div>
-
-                <div class="param">
-                    <label>FP16</label>
-                    <label class="switch">
-                        <input type="checkbox" name="fp16" {% if use_fp16 %}checked{% endif %}>
-                        <span class="slider"></span>
-                    </label>
-                </div>
-
+                <h3>Parakeet</h3>
+                <input name="alpha" value="{{ alpha }}">
+                <input name="beta" value="{{ beta }}">
                 {% endif %}
 
-
                 {% if selected_model == "whisper" %}
-
-                <h3>Whisper settings</h3>
-
-                <label>Language</label>
-                <input type="text" name="whisper_language" value="{{ whisper_language }}">
-
-                <div class="param">
-                    <label>Temperature</label>
-                    <input type="number" step="0.1" name="temperature" value="{{ temperature }}">
-                </div>
-
-                <div class="param">
-                    <label>Best of</label>
-                    <input type="number" name="best_of" value="{{ best_of }}">
-                </div>
-
-                <div class="param">
-                    <label>VAD filter</label>
-                    <label class="switch">
-                        <input type="checkbox" name="vad_filter" {% if vad_filter %}checked{% endif %}>
-                        <span class="slider"></span>
-                    </label>
-                </div>
-
+                <h3>Whisper</h3>
+                <input name="whisper_language" value="{{ whisper_language }}">
                 {% endif %}
 
                 <hr>
 
-                <div class="button-row">
-                    <button type="submit" name="action" value="clear">
-                        Clear
-                    </button>
+                {% if transcript %}
+                <button type="submit" name="action" value="clear">Clear</button>
 
-                    {% if transcript %}
-                    <button type="submit" formaction="{{ url_for('download') }}" name="transcript" value="{{ transcript }}">
-                        Download
-                    </button>
-                    {% endif %}
-                </div>
+                <button type="submit"
+                        formaction="{{ url_for('download') }}"
+                        name="transcript"
+                        value="{{ transcript }}">
+                    Download
+                </button>
+                {% endif %}
 
             </form>
 
