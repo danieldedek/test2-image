@@ -15,25 +15,26 @@
         <h3>Uploaded files</h3>
 
         {% if files %}
-            <ul>
-                {% for file in files %}
-                <li>
-                    <strong>{{ file }}</strong>
+        <ul>
+            {% for file in files %}
+            <li>
+                <strong>{{ file }}</strong>
 
-                    <audio controls>
-                        <source src="{{ url_for('uploaded_file', filename=file) }}" type="audio/wav">
-                    </audio>
+                <audio controls>
+                    <source src="{{ url_for('uploaded_file', filename=file) }}" type="audio/wav">
+                </audio>
 
-                    <button type="submit" form="main-form" name="audio_file" value="{{ file }}">
-                        Use
-                    </button>
+                <form method="POST" id="use-{{ file }}" style="display:inline;">
+                    <input type="hidden" name="audio_file" value="{{ file }}">
+                    <button type="submit">Use</button>
+                </form>
 
-                    <form method="POST" action="{{ url_for('delete_file', filename=file) }}" style="display:inline;">
-                        <button type="submit" style="background:#c0392b;">Delete</button>
-                    </form>
-                </li>
-                {% endfor %}
-            </ul>
+                <form method="POST" action="{{ url_for('delete_file', filename=file) }}" style="display:inline;">
+                    <button type="submit" style="background:#c0392b;">Delete</button>
+                </form>
+            </li>
+            {% endfor %}
+        </ul>
         {% endif %}
 
     </aside>
@@ -43,15 +44,17 @@
 
             <h2>ASR Demo</h2>
 
-            <form id="main-form" method="POST" enctype="multipart/form-data">
-
+            <form method="POST" enctype="multipart/form-data">
                 <input type="file" name="file" accept=".wav">
                 <button type="submit">Upload</button>
+            </form>
 
-                <hr>
+            <hr>
+
+            <form method="POST" enctype="multipart/form-data">
 
                 <label>Model</label>
-                <select name="engine" onchange="this.form.submit()">
+                <select name="engine">
                     <option value="canary" {% if engine=="canary" %}selected{% endif %}>Canary</option>
                     <option value="parakeet" {% if engine=="parakeet" %}selected{% endif %}>Parakeet</option>
                     <option value="whisper" {% if engine=="whisper" %}selected{% endif %}>Whisper</option>
@@ -65,14 +68,14 @@
 
                 <hr>
 
-                <label>Decoding strategy</label>
+                <label>Strategy</label>
                 <select name="strategy">
                     <option value="greedy" {% if strategy=="greedy" %}selected{% endif %}>Greedy</option>
                     <option value="beam" {% if strategy=="beam" %}selected{% endif %}>Beam</option>
                 </select>
 
                 <label>Beam size</label>
-                <input type="number" name="beam_size" value="{{ beam_size }}" min="1" max="10">
+                <input type="number" name="beam_size" value="{{ beam_size }}">
 
                 {% if engine == "canary" %}
 
@@ -87,10 +90,13 @@
                     <label>Length penalty</label>
                     <input type="number" step="0.1" name="len_pen" value="{{ len_pen }}">
 
-                    <label>
-                        <input type="checkbox" name="return_hypotheses" {% if return_hypotheses %}checked{% endif %}>
-                        Return hypotheses
-                    </label>
+                    <div class="param">
+                        <label>Return hypotheses</label>
+                        <label class="switch">
+                            <input type="checkbox" name="return_hypotheses" {% if return_hypotheses %}checked{% endif %}>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
 
                 {% endif %}
 
@@ -98,20 +104,23 @@
 
                     <h3>Parakeet settings</h3>
 
-                    <label>Alpha (LM weight)</label>
+                    <label>Alpha</label>
                     <input type="number" step="0.1" name="alpha" value="{{ alpha }}">
 
-                    <label>Beta (word bonus)</label>
+                    <label>Beta</label>
                     <input type="number" step="0.1" name="beta" value="{{ beta }}">
 
                 {% endif %}
 
-                <hr>
+                <div class="param">
+                    <label>FP16 (GPU acceleration)</label>
+                    <label class="switch">
+                        <input type="checkbox" name="fp16" {% if use_fp16 %}checked{% endif %}>
+                        <span class="slider"></span>
+                    </label>
+                </div>
 
-                <label>
-                    <input type="checkbox" name="fp16" {% if use_fp16 %}checked{% endif %}>
-                    FP16 (GPU acceleration)
-                </label>
+                <button type="submit">Transcribe</button>
 
             </form>
 
