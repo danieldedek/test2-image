@@ -46,7 +46,6 @@ def index():
     sort = request.args.get("sort", "date")
     search = request.args.get("search", "")
 
-    # DEFAULTS
     engine = request.form.get("engine") or "canary"
     device = request.form.get("device") or "cpu"
 
