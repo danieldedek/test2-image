@@ -37,7 +37,8 @@ def get_wav_files(page, sort, search):
             reverse=True
         )
 
-    total_pages = max(1, math.ceil(len(files) / FILES_PER_PAGE))
+    total = len(files)
+    total_pages = max(1, math.ceil(total / FILES_PER_PAGE))
 
     start = (page - 1) * FILES_PER_PAGE
     end = start + FILES_PER_PAGE
@@ -54,9 +55,7 @@ def index():
     sort = request.args.get("sort", "date")
     search = request.args.get("search", "")
 
-    selected_model = request.form.get("selected_model") or "canary"
-    engine = selected_model
-
+    engine = request.form.get("selected_model") or "canary"
     device = request.form.get("device") or "cpu"
     strategy = request.form.get("strategy") or "beam"
 
@@ -83,89 +82,90 @@ def index():
         if file and file.filename:
             filename = secure_filename(file.filename)
             file.save(os.path.join(UPLOAD_FOLDER, filename))
-        return redirect(url_for("index", page=1, sort=sort, search=search))
+        return redirect(url_for("index"))
+
+    if request.method == "POST" and action == "clear":
+        return redirect(url_for("index", page=page, sort=sort, search=search))
 
     if request.method == "POST" and action == "use_file":
         filename = request.form.get("audio_file")
 
-        try:
-            path = os.path.join(UPLOAD_FOLDER, secure_filename(filename))
+        if not filename:
+            error = "No file selected"
+        else:
+            try:
+                path = os.path.join(UPLOAD_FOLDER, secure_filename(filename))
 
-            if engine == "canary":
-                asr = create_asr_engine(
-                    "canary",
-                    device=device,
-                    strategy=strategy,
-                    beam_size=beam_size,
-                    len_pen=len_pen,
-                    batch_size=batch_size,
-                    language=language,
-                    return_hypotheses=return_hypotheses,
-                    use_fp16=use_fp16
-                )
+                if engine == "canary":
+                    asr = create_asr_engine(
+                        engine,
+                        device=device,
+                        strategy=strategy,
+                        beam_size=beam_size,
+                        len_pen=len_pen,
+                        language=language,
+                        return_hypotheses=return_hypotheses,
+                        batch_size=batch_size,
+                        use_fp16=use_fp16
+                    )
 
-            elif engine == "parakeet":
-                asr = create_asr_engine(
-                    "parakeet",
-                    device=device,
-                    strategy=strategy,
-                    beam_size=beam_size,
-                    alpha=alpha,
-                    beta=beta,
-                    batch_size=batch_size,
-                    use_fp16=use_fp16
-                )
+                elif engine == "parakeet":
+                    asr = create_asr_engine(
+                        engine,
+                        device=device,
+                        strategy=strategy,
+                        beam_size=beam_size,
+                        alpha=alpha,
+                        beta=beta,
+                        batch_size=batch_size,
+                        use_fp16=use_fp16
+                    )
 
-            elif engine == "whisper":
-                asr = create_asr_engine(
-                    "whisper",
-                    device=device,
-                    beam_size=beam_size,
-                    language=whisper_language,
-                    temperature=temperature,
-                    vad_filter=vad_filter,
-                    best_of=best_of
-                )
+                elif engine == "whisper":
+                    asr = create_asr_engine(
+                        engine,
+                        device=device,
+                        beam_size=beam_size,
+                        language=whisper_language,
+                        temperature=temperature,
+                        vad_filter=vad_filter,
+                        best_of=best_of
+                    )
 
-            transcript = asr.transcribe(path)
+                transcript = asr.transcribe(path)
 
-            if engine == "canary" and return_hypotheses:
-                transcript = transcript.text
+                if engine == "canary" and return_hypotheses:
+                    transcript = transcript.text
 
-        except Exception as e:
-            error = f"Error: {e}"
+            except Exception as e:
+                error = f"Error: {e}"
 
     files, total_pages = get_wav_files(page, sort, search)
 
     return render_template(
         "index.html",
         files=files,
+        transcript=transcript,
+        error=error,
         page=page,
         total_pages=total_pages,
         sort=sort,
         search=search,
-
-        selected_model=selected_model,
+        selected_model=engine,
         device=device,
         strategy=strategy,
         beam_size=beam_size,
         batch_size=batch_size,
-
         len_pen=len_pen,
         language=language,
         return_hypotheses=return_hypotheses,
-
         alpha=alpha,
         beta=beta,
         use_fp16=use_fp16,
-
         whisper_language=whisper_language,
         temperature=temperature,
         best_of=best_of,
-        vad_filter=vad_filter,
-
-        transcript=transcript,
-        error=error
+        vad_filter=vad_filter
     )
 
 
