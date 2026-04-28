@@ -36,7 +36,9 @@ def index():
     vad_filter = request.form.get("vad_filter") == "on"
     best_of = int(request.form.get("best_of", 5))
 
-    if request.method == "POST" and request.form.get("action") == "upload":
+    action = request.form.get("action")
+
+    if request.method == "POST" and action == "upload":
         file = request.files.get("file")
 
         if file and file.filename:
@@ -45,60 +47,72 @@ def index():
 
         return redirect(url_for("index"))
 
-    if request.method == "POST" and request.form.get("action") == "use_file":
-        try:
-            filename = secure_filename(request.form.get("audio_file"))
-            path = os.path.join(UPLOAD_FOLDER, filename)
+    if request.method == "POST" and action == "select_model":
+        return render_template(
+            "index.html",
+            selected_model=selected_model
+        )
 
-            if not os.path.exists(path):
-                raise ValueError("File not found")
+    if request.method == "POST" and action == "use_file":
 
-            if engine == "canary":
-                asr = create_asr_engine(
-                    engine,
-                    device=device,
-                    strategy=strategy,
-                    beam_size=beam_size,
-                    len_pen=len_pen,
-                    language=language,
-                    return_hypotheses=return_hypotheses,
-                    batch_size=batch_size,
-                    use_fp16=use_fp16
-                )
+        filename = request.form.get("audio_file")
 
-            elif engine == "parakeet":
-                asr = create_asr_engine(
-                    engine,
-                    device=device,
-                    strategy=strategy,
-                    beam_size=beam_size,
-                    alpha=alpha,
-                    beta=beta,
-                    batch_size=batch_size,
-                    use_fp16=use_fp16
-                )
+        if not filename:
+            error = "No file selected"
+        else:
+            try:
+                filename = secure_filename(filename)
+                path = os.path.join(UPLOAD_FOLDER, filename)
 
-            elif engine == "whisper":
-                asr = create_asr_engine(
-                    engine,
-                    device=device,
-                    beam_size=beam_size,
-                    language=whisper_language,
-                    temperature=temperature,
-                    vad_filter=vad_filter,
-                    best_of=best_of
-                )
+                if not os.path.exists(path):
+                    raise ValueError("File not found")
 
-            else:
-                raise ValueError("Unknown model")
+                if engine == "canary":
+                    asr = create_asr_engine(
+                        engine,
+                        device=device,
+                        strategy=strategy,
+                        beam_size=beam_size,
+                        len_pen=len_pen,
+                        language=language,
+                        return_hypotheses=return_hypotheses,
+                        batch_size=batch_size,
+                        use_fp16=use_fp16
+                    )
 
-            transcript = asr.transcribe(path)
+                elif engine == "parakeet":
+                    asr = create_asr_engine(
+                        engine,
+                        device=device,
+                        strategy=strategy,
+                        beam_size=beam_size,
+                        alpha=alpha,
+                        beta=beta,
+                        batch_size=batch_size,
+                        use_fp16=use_fp16
+                    )
 
-            if engine == "canary" and return_hypotheses:
-                transcript = transcript.text
+                elif engine == "whisper":
+                    asr = create_asr_engine(
+                        engine,
+                        device=device,
+                        beam_size=beam_size,
+                        language=whisper_language,
+                        temperature=temperature,
+                        vad_filter=vad_filter,
+                        best_of=best_of
+                    )
 
-        except Exception as e:
-            error = f"Error: {e}"
+                else:
+                    raise ValueError("Unknown model")
+
+                transcript = asr.transcribe(path)
+
+                if engine == "canary" and return_hypotheses:
+                    transcript = transcript.text
+
+            except Exception as e:
+                error = f"Error: {e}"
 
     files = [
         f for f in os.listdir(UPLOAD_FOLDER)
@@ -107,13 +121,11 @@ def index():
 
     return render_template(
         "index.html",
-
         files=files,
         transcript=transcript,
         error=error,
 
         selected_model=selected_model,
-        engine=engine,
 
         device=device,
         strategy=strategy,
