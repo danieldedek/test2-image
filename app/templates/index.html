@@ -35,12 +35,10 @@
                         <source src="{{ url_for('uploaded_file', filename=file) }}" type="audio/wav">
                     </audio>
 
-                    <!-- Use file -->
                     <button type="submit" form="main-form" name="audio_file" value="{{ file }}">
                         Use
                     </button>
 
-                    <!-- Delete -->
                     <form method="POST" action="{{ url_for('delete_file', filename=file) }}" style="display:inline;">
                         <button type="submit" style="background:#c0392b;">Delete</button>
                     </form>
@@ -75,7 +73,6 @@
 
             <h2>ASR Demo</h2>
 
-            <!-- 🔥 JEDEN HLAVNÍ FORM -->
             <form id="main-form" method="POST" enctype="multipart/form-data">
 
                 <input type="file" name="file" accept=".wav">
