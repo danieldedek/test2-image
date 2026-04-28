@@ -20,6 +20,13 @@ def get_float(name, default):
     return float(value) if value not in (None, "") else default
 
 
+def get_files():
+    return [
+        f for f in os.listdir(UPLOAD_FOLDER)
+        if f.lower().endswith(".wav")
+    ]
+
+
 @app.route("/", methods=["GET", "POST"])
 def index():
     transcript = None
@@ -61,7 +68,29 @@ def index():
     if request.method == "POST" and action == "select_model":
         return render_template(
             "index.html",
-            selected_model=selected_model
+
+            files=get_files(),
+            selected_model=selected_model,
+            device=device,
+            strategy=strategy,
+            beam_size=beam_size,
+            batch_size=batch_size,
+
+            len_pen=len_pen,
+            language=language,
+            return_hypotheses=return_hypotheses,
+
+            alpha=alpha,
+            beta=beta,
+            use_fp16=use_fp16,
+
+            whisper_language=whisper_language,
+            temperature=temperature,
+            best_of=best_of,
+            vad_filter=vad_filter,
+
+            transcript=None,
+            error=None
         )
 
     if request.method == "POST" and action == "use_file":
@@ -125,22 +154,18 @@ def index():
             except Exception as e:
                 error = f"Error: {e}"
 
-    files = [
-        f for f in os.listdir(UPLOAD_FOLDER)
-        if f.lower().endswith(".wav")
-    ]
-
     return render_template(
         "index.html",
-        files=files,
+
+        files=get_files(),
         transcript=transcript,
         error=error,
 
         selected_model=selected_model,
-
         device=device,
         strategy=strategy,
         beam_size=beam_size,
+        batch_size=batch_size,
 
         len_pen=len_pen,
         language=language,
@@ -148,7 +173,6 @@ def index():
 
         alpha=alpha,
         beta=beta,
-        batch_size=batch_size,
         use_fp16=use_fp16,
 
         whisper_language=whisper_language,
