@@ -9,7 +9,6 @@ class Canary:
         strategy="beam",
         beam_size=5,
         len_pen=1.0,
-        batch_size=1,
         language="cs",
         use_fp16=False,
         return_hypotheses=False
@@ -21,7 +20,6 @@ class Canary:
         self.strategy = strategy
         self.beam_size = beam_size
         self.len_pen = len_pen
-        self.batch_size = batch_size
         self.language = language
         self.use_fp16 = use_fp16
         self.return_hypotheses = return_hypotheses
@@ -47,7 +45,6 @@ class Canary:
 
         result = self.model.transcribe(
             [audio_path],
-            batch_size=self.batch_size,
             language=self.language,
             return_hypotheses=self.return_hypotheses
         )
