@@ -3,7 +3,7 @@ import torch
 
 
 class Parakeet:
-    def __init__(self):
+    def __init__(self, device="cpu"):
         self.model_name = "nvidia/parakeet-tdt-0.6b-v3"
         self.model = None
 
