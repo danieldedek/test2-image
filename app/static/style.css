@@ -43,6 +43,13 @@ form {
     margin-bottom: 15px;
 }
 
+label {
+    font-size: 13px;
+    display: block;
+    margin-bottom: 4px;
+    color: #444;
+}
+
 input, select, textarea {
     width: 100%;
     padding: 10px;
@@ -69,6 +76,18 @@ button {
 
 button:hover {
     background: #0f1b3a;
+}
+
+.inline-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.inline-row input,
+.inline-row select {
+    flex: 1;
+    margin-bottom: 0;
 }
 
 audio {
@@ -141,10 +160,11 @@ li {
     background: #0f1b3a;
 }
 
-.sort-info {
+.sort-label {
     font-size: 12px;
-    margin-bottom: 10px;
+    text-align: center;
     color: #555;
+    margin-bottom: 10px;
 }
 
 .pagination {
@@ -170,38 +190,15 @@ li {
     margin-bottom: 12px;
 }
 
-.param label {
-    font-size: 13px;
-    display: block;
-    margin-bottom: 4px;
-    color: #444;
-}
-
-.inline-row {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-}
-
-.inline-row input,
-.inline-row select {
-    flex: 1;
-}
-
-.param-switch {
+.param-inline {
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-.param-switch label {
+.param-inline label {
     margin: 0;
 }
-
-.delete-btn {
-    background: #c0392b;
-}
-
 
 .switch {
     position: relative;
