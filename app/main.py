@@ -64,7 +64,6 @@ def index():
     strategy = request.form.get("strategy") or "beam"
 
     beam_size = get_int("beam_size", 5)
-    batch_size = get_int("batch_size", 1)
     use_fp16 = request.form.get("fp16") == "on"
 
     len_pen = get_float("len_pen", 1.0)
@@ -91,14 +90,7 @@ def index():
 
     if request.method == "POST" and action == "select_model":
         selected = request.form.get("selected_model") or "canary"
-
-        return redirect(url_for(
-            "index",
-            model=selected,
-            page=page,
-            sort=sort,
-            search=search
-        ))
+        return redirect(url_for("index", model=selected, page=page, sort=sort, search=search))
 
     if request.method == "POST" and action == "clear":
         return redirect(url_for("index", model=engine, page=page, sort=sort, search=search))
@@ -121,7 +113,6 @@ def index():
                         len_pen=len_pen,
                         language=language,
                         return_hypotheses=return_hypotheses,
-                        batch_size=batch_size,
                         use_fp16=use_fp16
                     )
 
@@ -133,7 +124,6 @@ def index():
                         beam_size=beam_size,
                         alpha=alpha,
                         beta=beta,
-                        batch_size=batch_size,
                         use_fp16=use_fp16
                     )
 
@@ -171,7 +161,6 @@ def index():
         device=device,
         strategy=strategy,
         beam_size=beam_size,
-        batch_size=batch_size,
         len_pen=len_pen,
         language=language,
         return_hypotheses=return_hypotheses,
@@ -201,7 +190,6 @@ def delete_file(filename):
     path = os.path.join(UPLOAD_FOLDER, filename)
     if os.path.exists(path):
         os.remove(path)
-
     return redirect(url_for("index"))
 
 
