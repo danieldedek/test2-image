@@ -17,11 +17,16 @@
         <form method="GET" class="search-form">
             <input type="text" name="search" value="{{ search }}" placeholder="Search...">
             <input type="hidden" name="sort" value="{{ sort }}">
+            <input type="hidden" name="model" value="{{ selected_model }}">
             <button>Go</button>
         </form>
 
         <a class="sort-btn"
-           href="{{ url_for('index', sort='name' if sort=='date' else 'date', search=search) }}">
+           href="{{ url_for('index',
+                            sort='name' if sort=='date' else 'date',
+                            search=search,
+                            page=page,
+                            model=selected_model) }}">
             Toggle sort
         </a>
 
@@ -63,19 +68,35 @@
         {% endif %}
 
         <div class="pagination">
+
             <div>
                 {% if page > 1 %}
-                <a href="{{ url_for('index', page=page-1, sort=sort, search=search) }}">Prev</a>
+                <a href="{{ url_for('index',
+                                     page=page-1,
+                                     sort=sort,
+                                     search=search,
+                                     model=selected_model) }}">
+                    Prev
+                </a>
                 {% endif %}
             </div>
 
-            <div>Page {{ page }} / {{ total_pages }}</div>
+            <div>
+                Page {{ page }} / {{ total_pages }}
+            </div>
 
             <div>
                 {% if page < total_pages %}
-                <a href="{{ url_for('index', page=page+1, sort=sort, search=search) }}">Next</a>
+                <a href="{{ url_for('index',
+                                     page=page+1,
+                                     sort=sort,
+                                     search=search,
+                                     model=selected_model) }}">
+                    Next
+                </a>
                 {% endif %}
             </div>
+
         </div>
 
     </aside>
@@ -88,10 +109,16 @@
             <form id="main-form" method="POST" enctype="multipart/form-data">
 
                 <input type="hidden" name="audio_file" id="audio_file_input">
+                <input type="hidden" name="page" value="{{ page }}">
+                <input type="hidden" name="sort" value="{{ sort }}">
+                <input type="hidden" name="search" value="{{ search }}">
+                <input type="hidden" name="selected_model" value="{{ selected_model }}">
 
                 <div class="inline-row">
                     <input type="file" name="file" accept=".wav">
-                    <button type="submit" name="action" value="upload">Upload</button>
+                    <button type="submit" name="action" value="upload">
+                        Upload
+                    </button>
                 </div>
 
                 <hr>
@@ -103,7 +130,9 @@
                         <option value="whisper" {% if selected_model=="whisper" %}selected{% endif %}>Whisper</option>
                     </select>
 
-                    <button type="submit" name="action" value="select_model">Select model</button>
+                    <button type="submit" name="action" value="select_model">
+                        Select model
+                    </button>
                 </div>
 
                 <hr>
@@ -121,8 +150,8 @@
                 </select>
 
                 <div class="param">
-                    <label>Beam size (default: 5, range: 1–10)</label>
-                    <input type="number" name="beam_size" value="{{ beam_size }}" min="1" max="10">
+                    <label>Beam size</label>
+                    <input type="number" name="beam_size" value="{{ beam_size }}">
                 </div>
 
                 {% if selected_model == "canary" %}
@@ -135,12 +164,12 @@
                 </select>
 
                 <div class="param">
-                    <label>Length penalty (default: 1.0, range: 0.5–2.0)</label>
+                    <label>Length penalty</label>
                     <input type="number" step="0.1" name="len_pen" value="{{ len_pen }}">
                 </div>
 
                 <div class="param">
-                    <label>Batch size (default: 1, range: 1–16)</label>
+                    <label>Batch size</label>
                     <input type="number" name="batch_size" value="{{ batch_size }}">
                 </div>
 
@@ -165,17 +194,17 @@
                 <h3>Parakeet settings</h3>
 
                 <div class="param">
-                    <label>Alpha (default: 0.5, range: 0–2)</label>
+                    <label>Alpha</label>
                     <input type="number" step="0.1" name="alpha" value="{{ alpha }}">
                 </div>
 
                 <div class="param">
-                    <label>Beta (default: 1.0, range: 0–5)</label>
+                    <label>Beta</label>
                     <input type="number" step="0.1" name="beta" value="{{ beta }}">
                 </div>
 
                 <div class="param">
-                    <label>Batch size (default: 4, range: 1–16)</label>
+                    <label>Batch size</label>
                     <input type="number" name="batch_size" value="{{ batch_size }}">
                 </div>
 
@@ -199,12 +228,12 @@
                 </select>
 
                 <div class="param">
-                    <label>Temperature (default: 0.0, range: 0–1)</label>
+                    <label>Temperature</label>
                     <input type="number" step="0.1" name="temperature" value="{{ temperature }}">
                 </div>
 
                 <div class="param">
-                    <label>Best of (default: 5, range: 1–10)</label>
+                    <label>Best of</label>
                     <input type="number" name="best_of" value="{{ best_of }}">
                 </div>
 
@@ -224,6 +253,7 @@
                 <textarea readonly>{{ transcript }}</textarea>
 
                 <div class="button-row">
+
                     <form method="POST" action="{{ url_for('download') }}">
                         <input type="hidden" name="transcript" value="{{ transcript }}">
                         <button>Download</button>
@@ -232,6 +262,7 @@
                     <form method="POST">
                         <button name="action" value="clear">Clear</button>
                     </form>
+
                 </div>
             </div>
             {% endif %}
