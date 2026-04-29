@@ -110,17 +110,21 @@
 
                 <hr>
 
-                <label>Device</label>
-                <select name="device">
-                    <option value="cpu" {% if device=="cpu" %}selected{% endif %}>CPU</option>
-                    <option value="cuda" {% if device=="cuda" %}selected{% endif %}>GPU</option>
-                </select>
+                <div class="param">
+                    <label>Device</label>
+                    <select name="device">
+                        <option value="cpu" {% if device=="cpu" %}selected{% endif %}>CPU</option>
+                        <option value="cuda" {% if device=="cuda" %}selected{% endif %}>GPU</option>
+                    </select>
+                </div>
 
-                <label>Strategy</label>
-                <select name="strategy">
-                    <option value="greedy" {% if strategy=="greedy" %}selected{% endif %}>Greedy</option>
-                    <option value="beam" {% if strategy=="beam" %}selected{% endif %}>Beam</option>
-                </select>
+                <div class="param">
+                    <label>Strategy</label>
+                    <select name="strategy">
+                        <option value="greedy" {% if strategy=="greedy" %}selected{% endif %}>Greedy</option>
+                        <option value="beam" {% if strategy=="beam" %}selected{% endif %}>Beam</option>
+                    </select>
+                </div>
 
                 <div class="param">
                     <label>Beam size</label>
@@ -130,11 +134,13 @@
                 {% if selected_model == "canary" %}
                 <h3>Canary settings</h3>
 
-                <label>Language</label>
-                <select name="language">
-                    <option value="cs" {% if language=="cs" %}selected{% endif %}>Czech</option>
-                    <option value="en" {% if language=="en" %}selected{% endif %}>English</option>
-                </select>
+                <div class="param">
+                    <label>Language</label>
+                    <select name="language">
+                        <option value="cs" {% if language=="cs" %}selected{% endif %}>Czech</option>
+                        <option value="en" {% if language=="en" %}selected{% endif %}>English</option>
+                    </select>
+                </div>
 
                 <div class="param">
                     <label>Length penalty</label>
@@ -193,8 +199,14 @@
                 {% if selected_model == "whisper" %}
                 <h3>Whisper settings</h3>
 
-                <label>Language</label>
-                <input type="text" name="whisper_language" value="{{ whisper_language }}">
+                <div class="param">
+                    <label>Language</label>
+                    <select name="whisper_language">
+                        <option value="">Auto</option>
+                        <option value="cs" {% if whisper_language=="cs" %}selected{% endif %}>Czech</option>
+                        <option value="en" {% if whisper_language=="en" %}selected{% endif %}>English</option>
+                    </select>
+                </div>
 
                 <div class="param">
                     <label>Temperature</label>
