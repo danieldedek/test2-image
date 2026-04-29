@@ -51,10 +51,11 @@ def index():
     transcript = None
     error = None
 
+    engine = request.args.get("model", "canary")
+
     page = int(request.args.get("page", 1))
     sort = request.args.get("sort", "date")
     search = request.args.get("search", "")
-    engine = request.args.get("model", "canary")
 
     if request.method == "POST":
         engine = request.form.get("selected_model") or engine
@@ -82,80 +83,78 @@ def index():
 
     if request.method == "POST" and action == "upload":
         file = request.files.get("file")
-
         if file and file.filename:
             filename = secure_filename(file.filename)
             file.save(os.path.join(UPLOAD_FOLDER, filename))
 
-        return redirect(url_for("index",
-                                model=engine,
-                                page=page,
-                                sort=sort,
-                                search=search))
+        return redirect(url_for("index", model=engine, page=page, sort=sort, search=search))
 
     if request.method == "POST" and action == "select_model":
-        return redirect(url_for("index",
-                                model=engine,
-                                page=page,
-                                sort=sort,
-                                search=search))
+        selected = request.form.get("selected_model") or "canary"
+
+        return redirect(url_for(
+            "index",
+            model=selected,
+            page=page,
+            sort=sort,
+            search=search
+        ))
 
     if request.method == "POST" and action == "clear":
-        return redirect(url_for("index",
-                                model=engine,
-                                page=page,
-                                sort=sort,
-                                search=search))
+        return redirect(url_for("index", model=engine, page=page, sort=sort, search=search))
 
     if request.method == "POST" and action == "use_file":
         filename = request.form.get("audio_file")
 
-        try:
-            path = os.path.join(UPLOAD_FOLDER, secure_filename(filename))
+        if not filename:
+            error = "No file selected"
+        else:
+            try:
+                path = os.path.join(UPLOAD_FOLDER, secure_filename(filename))
 
-            if engine == "canary":
-                asr = create_asr_engine(
-                    engine,
-                    device=device,
-                    strategy=strategy,
-                    beam_size=beam_size,
-                    len_pen=len_pen,
-                    language=language,
-                    return_hypotheses=return_hypotheses,
-                    batch_size=batch_size,
-                    use_fp16=use_fp16
-                )
+                if engine == "canary":
+                    asr = create_asr_engine(
+                        engine,
+                        device=device,
+                        strategy=strategy,
+                        beam_size=beam_size,
+                        len_pen=len_pen,
+                        language=language,
+                        return_hypotheses=return_hypotheses,
+                        batch_size=batch_size,
+                        use_fp16=use_fp16
+                    )
 
-            elif engine == "parakeet":
-                asr = create_asr_engine(
-                    engine,
-                    device=device,
-                    strategy=strategy,
-                    beam_size=beam_size,
-                    alpha=alpha,
-                    beta=beta,
-                    batch_size=batch_size,
-                    use_fp16=use_fp16
-                )
+                elif engine == "parakeet":
+                    asr = create_asr_engine(
+                        engine,
+                        device=device,
+                        strategy=strategy,
+                        beam_size=beam_size,
+                        alpha=alpha,
+                        beta=beta,
+                        batch_size=batch_size,
+                        use_fp16=use_fp16
+                    )
 
-            elif engine == "whisper":
-                asr = create_asr_engine(
-                    engine,
-                    device=device,
-                    beam_size=beam_size,
-                    language=whisper_language,
-                    temperature=temperature,
-                    vad_filter=vad_filter,
-                    best_of=best_of
-                )
+                elif engine == "whisper":
+                    asr = create_asr_engine(
+                        engine,
+                        device=device,
+                        beam_size=beam_size,
+                        language=whisper_language,
+                        temperature=temperature,
+                        vad_filter=vad_filter,
+                        best_of=best_of
+                    )
 
-            transcript = asr.transcribe(path)
+                transcript = asr.transcribe(path)
 
-            if engine == "canary" and return_hypotheses:
-                transcript = transcript.text
+                if engine == "canary" and return_hypotheses:
+                    transcript = transcript.text
 
-        except Exception as e:
-            error = f"Error: {e}"
+            except Exception as e:
+                error = f"Error: {e}"
 
     files, total_pages = get_wav_files(page, sort, search)
 
@@ -200,7 +199,6 @@ def download():
 @app.route("/delete/<filename>", methods=["POST"])
 def delete_file(filename):
     path = os.path.join(UPLOAD_FOLDER, filename)
-
     if os.path.exists(path):
         os.remove(path)
 
