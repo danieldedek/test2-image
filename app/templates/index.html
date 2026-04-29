@@ -23,10 +23,9 @@
 
         <a class="sort-btn"
            href="{{ url_for('index',
-                            sort='name' if sort=='date' else 'date',
-                            search=search,
-                            page=page,
-                            model=selected_model) }}">
+                sort='name' if sort=='date' else 'date',
+                search=search,
+                model=selected_model) }}">
             Toggle sort
         </a>
 
@@ -72,28 +71,22 @@
             <div>
                 {% if page > 1 %}
                 <a href="{{ url_for('index',
-                                     page=page-1,
-                                     sort=sort,
-                                     search=search,
-                                     model=selected_model) }}">
-                    Prev
-                </a>
+                    page=page-1,
+                    sort=sort,
+                    search=search,
+                    model=selected_model) }}">Prev</a>
                 {% endif %}
             </div>
 
-            <div>
-                Page {{ page }} / {{ total_pages }}
-            </div>
+            <div>Page {{ page }} / {{ total_pages }}</div>
 
             <div>
                 {% if page < total_pages %}
                 <a href="{{ url_for('index',
-                                     page=page+1,
-                                     sort=sort,
-                                     search=search,
-                                     model=selected_model) }}">
-                    Next
-                </a>
+                    page=page+1,
+                    sort=sort,
+                    search=search,
+                    model=selected_model) }}">Next</a>
                 {% endif %}
             </div>
 
@@ -109,16 +102,10 @@
             <form id="main-form" method="POST" enctype="multipart/form-data">
 
                 <input type="hidden" name="audio_file" id="audio_file_input">
-                <input type="hidden" name="page" value="{{ page }}">
-                <input type="hidden" name="sort" value="{{ sort }}">
-                <input type="hidden" name="search" value="{{ search }}">
-                <input type="hidden" name="selected_model" value="{{ selected_model }}">
 
                 <div class="inline-row">
                     <input type="file" name="file" accept=".wav">
-                    <button type="submit" name="action" value="upload">
-                        Upload
-                    </button>
+                    <button type="submit" name="action" value="upload">Upload</button>
                 </div>
 
                 <hr>
@@ -130,9 +117,7 @@
                         <option value="whisper" {% if selected_model=="whisper" %}selected{% endif %}>Whisper</option>
                     </select>
 
-                    <button type="submit" name="action" value="select_model">
-                        Select model
-                    </button>
+                    <button type="submit" name="action" value="select_model">Select model</button>
                 </div>
 
                 <hr>
@@ -253,7 +238,6 @@
                 <textarea readonly>{{ transcript }}</textarea>
 
                 <div class="button-row">
-
                     <form method="POST" action="{{ url_for('download') }}">
                         <input type="hidden" name="transcript" value="{{ transcript }}">
                         <button>Download</button>
@@ -262,7 +246,6 @@
                     <form method="POST">
                         <button name="action" value="clear">Clear</button>
                     </form>
-
                 </div>
             </div>
             {% endif %}
