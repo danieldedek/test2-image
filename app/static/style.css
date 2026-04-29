@@ -43,13 +43,6 @@ form {
     margin-bottom: 15px;
 }
 
-label {
-    font-size: 13px;
-    display: block;
-    margin-bottom: 4px;
-    color: #444;
-}
-
 input, select, textarea {
     width: 100%;
     padding: 10px;
@@ -71,23 +64,18 @@ button {
     background: #192a56;
     color: white;
     cursor: pointer;
-    white-space: nowrap;
 }
 
 button:hover {
     background: #0f1b3a;
 }
 
-.inline-row {
-    display: flex;
-    gap: 10px;
-    align-items: center;
+button.delete-btn {
+    background: #c0392b;
 }
 
-.inline-row input,
-.inline-row select {
-    flex: 1;
-    margin-bottom: 0;
+button.delete-btn:hover {
+    background: #922b21;
 }
 
 audio {
@@ -128,6 +116,18 @@ li {
     margin: 0;
 }
 
+.inline-group {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.inline-group input,
+.inline-group select {
+    flex: 1;
+    margin-bottom: 0;
+}
+
 .search-form {
     display: flex;
     gap: 5px;
@@ -160,11 +160,11 @@ li {
     background: #0f1b3a;
 }
 
-.sort-label {
+.sort-info {
     font-size: 12px;
     text-align: center;
-    color: #555;
     margin-bottom: 10px;
+    color: #555;
 }
 
 .pagination {
@@ -190,14 +190,19 @@ li {
     margin-bottom: 12px;
 }
 
-.param-inline {
+.param label,
+label {
+    font-size: 13px;
+    display: block;
+    margin-bottom: 4px;
+    color: #444;
+    font-weight: 500;
+}
+
+.param-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-}
-
-.param-inline label {
-    margin: 0;
 }
 
 .switch {
