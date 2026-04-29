@@ -10,7 +10,6 @@ class Parakeet:
         beam_size=5,
         alpha=0.5,
         beta=1.0,
-        batch_size=4,
         use_fp16=False
     ):
         self.model_name = "nvidia/parakeet-tdt-0.6b-v3"
@@ -21,7 +20,6 @@ class Parakeet:
         self.beam_size = beam_size
         self.alpha = alpha
         self.beta = beta
-        self.batch_size = batch_size
         self.use_fp16 = use_fp16
 
     def download(self):
@@ -41,8 +39,5 @@ class Parakeet:
         if self.model is None:
             self.download()
 
-        return self.model.transcribe(
-            [audio_path],
-            batch_size=self.batch_size
-        )[0]
+        return self.model.transcribe([audio_path])[0]
         
