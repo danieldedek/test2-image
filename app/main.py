@@ -68,7 +68,7 @@ def index():
 
     len_pen = get_float("len_pen", 1.0)
     language = request.form.get("language") or "cs"
-    return_hypotheses = request.form.get("return_hypotheses") == "on"
+    return_hypotheses = request.form.get("return_hypotheses") != "on"
 
     alpha = get_float("alpha", 0.5)
     beta = get_float("beta", 1.0)
