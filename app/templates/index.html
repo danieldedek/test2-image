@@ -22,8 +22,12 @@
 
         <a class="sort-btn"
            href="{{ url_for('index', sort='name' if sort=='date' else 'date', search=search) }}">
-            Sort: {{ 'Name' if sort=='name' else 'Date' }}
+            Sort by {{ 'name' if sort=='date' else 'date' }}
         </a>
+
+        <div class="sort-info">
+            Current: {{ 'Name' if sort=='name' else 'Date' }}
+        </div>
 
         {% if files %}
         <ul>
@@ -48,7 +52,7 @@
                     </button>
 
                     <form method="POST" action="{{ url_for('delete_file', filename=file) }}">
-                        <button type="submit" style="background:#c0392b;">Delete</button>
+                        <button type="submit" class="delete-btn">Delete</button>
                     </form>
 
                 </div>
@@ -85,23 +89,24 @@
 
                 <input type="hidden" name="audio_file" id="audio_file_input">
 
-                <input type="file" name="file" accept=".wav">
-                <button type="submit" name="action" value="upload">
-                    Upload
-                </button>
+                <div class="inline-row">
+                    <input type="file" name="file" accept=".wav">
+                    <button type="submit" name="action" value="upload">Upload</button>
+                </div>
 
                 <hr>
 
-                <label>Model</label>
-                <select name="selected_model">
-                    <option value="canary" {% if selected_model=="canary" %}selected{% endif %}>Canary</option>
-                    <option value="parakeet" {% if selected_model=="parakeet" %}selected{% endif %}>Parakeet</option>
-                    <option value="whisper" {% if selected_model=="whisper" %}selected{% endif %}>Whisper</option>
-                </select>
+                <div class="inline-row">
+                    <select name="selected_model">
+                        <option value="canary" {% if selected_model=="canary" %}selected{% endif %}>Canary</option>
+                        <option value="parakeet" {% if selected_model=="parakeet" %}selected{% endif %}>Parakeet</option>
+                        <option value="whisper" {% if selected_model=="whisper" %}selected{% endif %}>Whisper</option>
+                    </select>
 
-                <button type="submit" name="action" value="select_model">
-                    Select model
-                </button>
+                    <button type="submit" name="action" value="select_model">
+                        Select model
+                    </button>
+                </div>
 
                 <hr>
 
@@ -119,7 +124,7 @@
 
                 <div class="param">
                     <label>Beam size</label>
-                    <input type="number" name="beam_size" value="{{ beam_size }}" min="1" max="10">
+                    <input type="number" name="beam_size" value="{{ beam_size }}">
                 </div>
 
                 {% if selected_model == "canary" %}
@@ -141,7 +146,7 @@
                     <input type="number" name="batch_size" value="{{ batch_size }}">
                 </div>
 
-                <div class="param">
+                <div class="param param-switch">
                     <label>FP16</label>
                     <label class="switch">
                         <input type="checkbox" name="fp16" {% if use_fp16 %}checked{% endif %}>
@@ -149,7 +154,7 @@
                     </label>
                 </div>
 
-                <div class="param">
+                <div class="param param-switch">
                     <label>Return hypotheses</label>
                     <label class="switch">
                         <input type="checkbox" name="return_hypotheses" {% if return_hypotheses %}checked{% endif %}>
@@ -176,7 +181,7 @@
                     <input type="number" name="batch_size" value="{{ batch_size }}">
                 </div>
 
-                <div class="param">
+                <div class="param param-switch">
                     <label>FP16</label>
                     <label class="switch">
                         <input type="checkbox" name="fp16" {% if use_fp16 %}checked{% endif %}>
@@ -201,7 +206,7 @@
                     <input type="number" name="best_of" value="{{ best_of }}">
                 </div>
 
-                <div class="param">
+                <div class="param param-switch">
                     <label>VAD filter</label>
                     <label class="switch">
                         <input type="checkbox" name="vad_filter" {% if vad_filter %}checked{% endif %}>
