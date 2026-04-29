@@ -22,14 +22,9 @@
 
         <a class="sort-btn"
            href="{{ url_for('index', sort='name' if sort=='date' else 'date', search=search) }}">
-            Toggle sort
+            Sort: {{ 'Name' if sort=='name' else 'Date' }}
         </a>
 
-        <div class="sort-label">
-            Sorted by: {{ 'Name' if sort=='name' else 'Date' }}
-        </div>
-
-        {% if files %}
         <ul>
             {% for file in files %}
             <li>
@@ -52,7 +47,7 @@
                     </button>
 
                     <form method="POST" action="{{ url_for('delete_file', filename=file) }}">
-                        <button type="submit" class="delete-btn">Delete</button>
+                        <button type="submit" style="background:#c0392b;">Delete</button>
                     </form>
 
                 </div>
@@ -60,23 +55,6 @@
             </li>
             {% endfor %}
         </ul>
-        {% endif %}
-
-        <div class="pagination">
-            <div>
-                {% if page > 1 %}
-                <a href="{{ url_for('index', page=page-1, sort=sort, search=search) }}">Prev</a>
-                {% endif %}
-            </div>
-
-            <div>Page {{ page }} / {{ total_pages }}</div>
-
-            <div>
-                {% if page < total_pages %}
-                <a href="{{ url_for('index', page=page+1, sort=sort, search=search) }}">Next</a>
-                {% endif %}
-            </div>
-        </div>
 
     </aside>
 
@@ -91,11 +69,14 @@
 
                 <div class="inline-row">
                     <input type="file" name="file" accept=".wav">
-                    <button type="submit" name="action" value="upload">Upload</button>
+                    <button type="submit" name="action" value="upload">
+                        Upload
+                    </button>
                 </div>
 
                 <hr>
 
+                <label>Model</label>
                 <div class="inline-row">
                     <select name="selected_model">
                         <option value="canary" {% if selected_model=="canary" %}selected{% endif %}>Canary</option>
@@ -103,7 +84,9 @@
                         <option value="whisper" {% if selected_model=="whisper" %}selected{% endif %}>Whisper</option>
                     </select>
 
-                    <button type="submit" name="action" value="select_model">Select model</button>
+                    <button type="submit" name="action" value="select_model">
+                        Select model
+                    </button>
                 </div>
 
                 <hr>
@@ -121,11 +104,12 @@
                 </select>
 
                 <div class="param">
-                    <label>Beam size (default: 5, range: 1–10)</label>
-                    <input type="number" name="beam_size" value="{{ beam_size }}" min="1" max="10">
+                    <label>Beam size</label>
+                    <input type="number" name="beam_size" value="{{ beam_size }}">
                 </div>
 
                 {% if selected_model == "canary" %}
+
                 <h3>Canary settings</h3>
 
                 <label>Language</label>
@@ -135,86 +119,31 @@
                 </select>
 
                 <div class="param">
-                    <label>Length penalty (default: 1.0, range: 0.5–2.0)</label>
+                    <label>Length penalty</label>
                     <input type="number" step="0.1" name="len_pen" value="{{ len_pen }}">
                 </div>
 
                 <div class="param">
-                    <label>Batch size (default: 1, range: 1–16)</label>
+                    <label>Batch size</label>
                     <input type="number" name="batch_size" value="{{ batch_size }}">
                 </div>
 
-                <div class="param param-inline">
-                    <label>FP16</label>
+                <div class="param-row">
+                    <span>FP16</span>
                     <label class="switch">
                         <input type="checkbox" name="fp16" {% if use_fp16 %}checked{% endif %}>
                         <span class="slider"></span>
                     </label>
                 </div>
 
-                <div class="param param-inline">
-                    <label>Return hypotheses</label>
+                <div class="param-row">
+                    <span>Return hypotheses</span>
                     <label class="switch">
-                        <input type="checkbox" name="return_hypotheses" {% if return_hypotheses %}checked{% endif %}>
+                        <input type="checkbox" name="return_hypotheses" {% if not return_hypotheses %}checked{% endif %}>
                         <span class="slider"></span>
                     </label>
                 </div>
-                {% endif %}
 
-                {% if selected_model == "parakeet" %}
-                <h3>Parakeet settings</h3>
-
-                <div class="param">
-                    <label>Alpha (default: 0.5, range: 0–2)</label>
-                    <input type="number" step="0.1" name="alpha" value="{{ alpha }}">
-                </div>
-
-                <div class="param">
-                    <label>Beta (default: 1.0, range: 0–5)</label>
-                    <input type="number" step="0.1" name="beta" value="{{ beta }}">
-                </div>
-
-                <div class="param">
-                    <label>Batch size (default: 4, range: 1–16)</label>
-                    <input type="number" name="batch_size" value="{{ batch_size }}">
-                </div>
-
-                <div class="param param-inline">
-                    <label>FP16</label>
-                    <label class="switch">
-                        <input type="checkbox" name="fp16" {% if use_fp16 %}checked{% endif %}>
-                        <span class="slider"></span>
-                    </label>
-                </div>
-                {% endif %}
-
-                {% if selected_model == "whisper" %}
-                <h3>Whisper settings</h3>
-
-                <label>Language</label>
-                <select name="whisper_language">
-                    <option value="">Auto</option>
-                    <option value="cs" {% if whisper_language=="cs" %}selected{% endif %}>Czech</option>
-                    <option value="en" {% if whisper_language=="en" %}selected{% endif %}>English</option>
-                </select>
-
-                <div class="param">
-                    <label>Temperature (default: 0.0, range: 0–1)</label>
-                    <input type="number" step="0.1" name="temperature" value="{{ temperature }}">
-                </div>
-
-                <div class="param">
-                    <label>Best of (default: 5, range: 1–10)</label>
-                    <input type="number" name="best_of" value="{{ best_of }}">
-                </div>
-
-                <div class="param param-inline">
-                    <label>VAD filter</label>
-                    <label class="switch">
-                        <input type="checkbox" name="vad_filter" {% if vad_filter %}checked{% endif %}>
-                        <span class="slider"></span>
-                    </label>
-                </div>
                 {% endif %}
 
             </form>
@@ -224,6 +153,7 @@
                 <textarea readonly>{{ transcript }}</textarea>
 
                 <div class="button-row">
+
                     <form method="POST" action="{{ url_for('download') }}">
                         <input type="hidden" name="transcript" value="{{ transcript }}">
                         <button>Download</button>
@@ -232,6 +162,7 @@
                     <form method="POST">
                         <button name="action" value="clear">Clear</button>
                     </form>
+
                 </div>
             </div>
             {% endif %}
