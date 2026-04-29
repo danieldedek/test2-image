@@ -51,11 +51,10 @@ def index():
     transcript = None
     error = None
 
-    engine = request.args.get("model", "canary")
-
     page = int(request.args.get("page", 1))
     sort = request.args.get("sort", "date")
     search = request.args.get("search", "")
+    engine = request.args.get("model", "canary")
 
     if request.method == "POST":
         engine = request.form.get("selected_model") or engine
@@ -70,9 +69,6 @@ def index():
     language = request.form.get("language") or "cs"
     return_hypotheses = request.form.get("return_hypotheses") == "on"
 
-    alpha = get_float("alpha", 0.5)
-    beta = get_float("beta", 1.0)
-
     whisper_language = request.form.get("whisper_language") or None
     temperature = get_float("temperature", 0.0)
     best_of = get_int("best_of", 5)
@@ -85,12 +81,10 @@ def index():
         if file and file.filename:
             filename = secure_filename(file.filename)
             file.save(os.path.join(UPLOAD_FOLDER, filename))
-
         return redirect(url_for("index", model=engine, page=page, sort=sort, search=search))
 
     if request.method == "POST" and action == "select_model":
-        selected = request.form.get("selected_model") or "canary"
-        return redirect(url_for("index", model=selected, page=page, sort=sort, search=search))
+        return redirect(url_for("index", model=engine, page=page, sort=sort, search=search))
 
     if request.method == "POST" and action == "clear":
         return redirect(url_for("index", model=engine, page=page, sort=sort, search=search))
@@ -119,12 +113,7 @@ def index():
                 elif engine == "parakeet":
                     asr = create_asr_engine(
                         engine,
-                        device=device,
-                        strategy=strategy,
-                        beam_size=beam_size,
-                        alpha=alpha,
-                        beta=beta,
-                        use_fp16=use_fp16
+                        device=device
                     )
 
                 elif engine == "whisper":
@@ -164,8 +153,6 @@ def index():
         len_pen=len_pen,
         language=language,
         return_hypotheses=return_hypotheses,
-        alpha=alpha,
-        beta=beta,
         use_fp16=use_fp16,
         whisper_language=whisper_language,
         temperature=temperature,
