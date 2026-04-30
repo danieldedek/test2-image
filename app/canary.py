@@ -1,7 +1,6 @@
 import nemo.collections.asr as nemo_asr
 import torch
 
-
 class Canary:
     def __init__(
         self,
@@ -15,7 +14,6 @@ class Canary:
     ):
         self.model_name = "nvidia/canary-180m-flash"
         self.model = None
-
         self.device = device
         self.strategy = strategy
         self.beam_size = beam_size
@@ -26,28 +24,30 @@ class Canary:
 
     def download(self):
         self.model = nemo_asr.models.EncDecMultiTaskModel.from_pretrained(self.model_name)
-
+        
         device = "cuda" if self.device == "cuda" and torch.cuda.is_available() else "cpu"
         self.model = self.model.to(device)
-
+        
         if device == "cuda" and self.use_fp16:
             self.model = self.model.half()
 
         self.model.change_decoding_strategy({
             "strategy": self.strategy,
-            "beam_size": self.beam_size,
-            "len_pen": self.len_pen,
+            "beam": {
+                "beam_size": self.beam_size,
+                "len_pen": self.len_pen,
+            }
         })
 
     def transcribe(self, audio_path: str):
         if self.model is None:
             self.download()
-
+        
         result = self.model.transcribe(
             [audio_path],
-            language=self.language,
+            source_lang=self.language,
+            target_lang=self.language,
             return_hypotheses=self.return_hypotheses
         )
-
         return result[0]
         
