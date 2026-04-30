@@ -1,15 +1,15 @@
+from whisper import Whisper
+from parakeet import Parakeet
+from canary import Canary
+
 _model_cache = {}
-_current_key = None
+
 
 def create_asr_engine(engine_name: str, device: str = "cpu", **kwargs):
-    global _current_key
-
     key = (engine_name, device, tuple(sorted(kwargs.items())))
 
-    if key == _current_key:
+    if key in _model_cache:
         return _model_cache[key]
-
-    _model_cache.clear()
 
     engines = {
         "whisper": Whisper,
@@ -17,11 +17,12 @@ def create_asr_engine(engine_name: str, device: str = "cpu", **kwargs):
         "canary": Canary,
     }
 
+    if engine_name not in engines:
+        raise ValueError(f"Unknown ASR engine: {engine_name}")
+
     model = engines[engine_name](device=device, **kwargs)
     model.download()
 
     _model_cache[key] = model
-    _current_key = key
-
     return model
     
