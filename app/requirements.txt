@@ -7,5 +7,5 @@ torchaudio
 pyarrow>=14.0.0
 datasets>=2.19.0
 matplotlib
-nemo_toolkit[asr]
+nemo_toolkit[asr]>=2.0.0
 numpy==1.26.4
