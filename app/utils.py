@@ -1,22 +1,15 @@
-from whisper import Whisper
-from parakeet import Parakeet
-from canary import Canary
-
-MODEL_INSTANCE = None
-MODEL_NAME = None
+_model_cache = {}
+_current_key = None
 
 def create_asr_engine(engine_name: str, device: str = "cpu", **kwargs):
-    global MODEL_INSTANCE, MODEL_NAME
+    global _current_key
 
-    if MODEL_INSTANCE is not None and MODEL_NAME == engine_name:
-        return MODEL_INSTANCE
+    key = (engine_name, device, tuple(sorted(kwargs.items())))
 
-    import gc
-    import torch
+    if key == _current_key:
+        return _model_cache[key]
 
-    MODEL_INSTANCE = None
-    gc.collect()
-    torch.cuda.empty_cache()
+    _model_cache.clear()
 
     engines = {
         "whisper": Whisper,
@@ -25,9 +18,10 @@ def create_asr_engine(engine_name: str, device: str = "cpu", **kwargs):
     }
 
     model = engines[engine_name](device=device, **kwargs)
+    model.download()
 
-    MODEL_INSTANCE = model
-    MODEL_NAME = engine_name
+    _model_cache[key] = model
+    _current_key = key
 
     return model
     
