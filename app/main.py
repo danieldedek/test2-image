@@ -117,15 +117,7 @@ def index():
                     )
 
                 elif engine == "parakeet":
-                    asr = create_asr_engine(
-                        engine,
-                        device=device,
-                        strategy=strategy,
-                        beam_size=beam_size,
-                        alpha=alpha,
-                        beta=beta,
-                        use_fp16=use_fp16
-                    )
+                    asr = create_asr_engine(engine)
 
                 elif engine == "whisper":
                     asr = create_asr_engine(
