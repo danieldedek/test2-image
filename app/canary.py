@@ -25,7 +25,7 @@ class Canary:
         self.return_hypotheses = return_hypotheses
 
     def download(self):
-        self.model = nemo_asr.models.EncDecCTCModelBPE.from_pretrained(self.model_name)
+        self.model = nemo_asr.models.ASRModel.from_pretrained(self.model_name)
 
         device = "cuda" if self.device == "cuda" and torch.cuda.is_available() else "cpu"
         self.model = self.model.to(device)
