@@ -23,7 +23,7 @@ class Parakeet:
         self.use_fp16 = use_fp16
 
     def download(self):
-        self.model = nemo_asr.models.ASRModel.from_pretrained(self.model_name)
+        self.model = nemo_asr.models.EncDecRNNTBPEModel.from_pretrained(self.model_name)
 
         device = "cuda" if self.device == "cuda" and torch.cuda.is_available() else "cpu"
         self.model = self.model.to(device)
