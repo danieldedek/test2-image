@@ -1,4 +1,4 @@
-FROM python:3.11-slim
+FROM python:3.10-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
@@ -9,11 +9,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     ffmpeg \
     gosu \
+    cmake \
+    git \
+    libsndfile1 \
     && rm -rf /var/lib/apt/lists/*
 
 RUN useradd -u 1000 -m appuser
 
 COPY app/requirements.txt .
+
 RUN pip install --upgrade pip setuptools wheel
 RUN pip install --no-cache-dir -r requirements.txt
 
