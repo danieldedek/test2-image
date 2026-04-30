@@ -4,7 +4,6 @@ from canary import Canary
 import torch
 import gc
 
-# 🔥 globální cache
 current_model = None
 current_engine = None
 
@@ -12,7 +11,6 @@ current_engine = None
 def create_asr_engine(engine_name: str, device: str = "cpu", **kwargs):
     global current_model, current_engine
 
-    # 🔥 pokud se změnil model → uvolni starý
     if current_engine != engine_name:
         if current_model is not None:
             del current_model
