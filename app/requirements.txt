@@ -1,11 +1,11 @@
 flask
 gunicorn
 faster-whisper
-torch==2.2.2
+torch
 torchvision
 torchaudio
 pyarrow>=14.0.0
 datasets>=2.19.0
 matplotlib
-nemo_toolkit[asr]==1.23.0
+nemo_toolkit[asr]
 numpy==1.26.4
