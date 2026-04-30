@@ -4,5 +4,6 @@ faster-whisper
 torch
 torchvision
 torchaudio
-pyarrow>=10.0.0,<14.0.0
+pyarrow>=10.0.0
+datasets>=2.14.0
 nemo_toolkit[asr]
