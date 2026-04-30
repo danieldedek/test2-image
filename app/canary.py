@@ -25,6 +25,8 @@ class Canary:
         self.return_hypotheses = return_hypotheses
 
     def download(self):
+        print("Loading Canary model...")
+
         self.model = nemo_asr.models.ASRModel.from_pretrained(self.model_name)
 
         device = "cuda" if self.device == "cuda" and torch.cuda.is_available() else "cpu"
