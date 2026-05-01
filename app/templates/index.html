@@ -122,11 +122,13 @@
 
                 <hr>
 
+                {% if selected_model != "whisper" %}
                 <label>Device</label>
                 <select name="device">
                     <option value="cpu" {% if device=="cpu" %}selected{% endif %}>CPU</option>
                     <option value="cuda" {% if device=="cuda" %}selected{% endif %}>GPU</option>
                 </select>
+                {% endif %}
 
                 <label>Strategy</label>
                 <select name="strategy">
@@ -175,16 +177,6 @@
                 {% if selected_model == "parakeet" %}
                 <h3>Parakeet settings</h3>
 
-                <div class="param">
-                    <label>Alpha</label>
-                    <input type="number" step="0.1" name="alpha" value="{{ alpha }}">
-                </div>
-
-                <div class="param">
-                    <label>Beta</label>
-                    <input type="number" step="0.1" name="beta" value="{{ beta }}">
-                </div>
-
                 <div class="param param-inline">
                     <label>FP16</label>
                     <label class="switch">
@@ -192,10 +184,27 @@
                         <span class="slider"></span>
                     </label>
                 </div>
+
+                <div class="param param-inline">
+                    <label>Return hypotheses</label>
+                    <label class="switch">
+                        <input type="checkbox" name="return_hypotheses" {% if return_hypotheses %}checked{% endif %}>
+                        <span class="slider"></span>
+                    </label>
+                </div>
                 {% endif %}
 
                 {% if selected_model == "whisper" %}
                 <h3>Whisper settings</h3>
+
+                <label>Model size</label>
+                <select name="model_size">
+                    <option value="tiny" {% if model_size=="tiny" %}selected{% endif %}>Tiny</option>
+                    <option value="base" {% if model_size=="base" %}selected{% endif %}>Base</option>
+                    <option value="small" {% if model_size=="small" %}selected{% endif %}>Small</option>
+                    <option value="medium" {% if model_size=="medium" %}selected{% endif %}>Medium</option>
+                    <option value="large-v3" {% if model_size=="large-v3" %}selected{% endif %}>Large v3</option>
+                </select>
 
                 <label>Language</label>
                 <select name="whisper_language">
@@ -218,6 +227,14 @@
                     <label>VAD filter</label>
                     <label class="switch">
                         <input type="checkbox" name="vad_filter" {% if vad_filter %}checked{% endif %}>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="param param-inline">
+                    <label>Condition on previous text</label>
+                    <label class="switch">
+                        <input type="checkbox" name="condition_on_previous_text" {% if condition_on_previous_text %}checked{% endif %}>
                         <span class="slider"></span>
                     </label>
                 </div>
