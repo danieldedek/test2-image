@@ -41,7 +41,7 @@ class Canary(BaseASR):
             [audio_path],
             source_lang=self.language,
             target_lang=self.language,
-            return_hypotheses=self.return_hypotheses
+            return_hypotheses=True
         )
-        return result[0]
+        return result[0].text
         
