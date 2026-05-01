@@ -44,11 +44,19 @@ class Canary:
     def transcribe(self, audio_path: str):
         if self.model is None:
             self.download()
-        
+
+        transcribe_cfg = [{
+            "audio_filepath": audio_path,
+            "duration": None,
+            "taskname": "asr",
+            "source_lang": self.language,
+            "target_lang": self.language,
+            "pnc": "yes",
+            "answer": "predict",
+        }]
+
         result = self.model.transcribe(
-            [audio_path],
-            source_lang=self.language,
-            target_lang=self.language,
+            transcribe_cfg,
             return_hypotheses=self.return_hypotheses
         )
         return result[0]
