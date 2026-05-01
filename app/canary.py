@@ -1,7 +1,9 @@
 import nemo.collections.asr as nemo_asr
 import torch
 
-class Canary:
+from baseASR import BaseASR
+
+class Canary(BaseASR):
     def __init__(
         self,
         device="cpu",
