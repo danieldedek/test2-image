@@ -1,6 +1,5 @@
 import nemo.collections.asr as nemo_asr
 import torch
-from omegaconf import OmegaConf
 
 class Canary:
     def __init__(
@@ -32,31 +31,14 @@ class Canary:
         if device == "cuda" and self.use_fp16:
             self.model = self.model.half()
 
-        decoding_cfg = self.model.cfg.decoding
-        with OmegaConf.open_dict(decoding_cfg):
-            decoding_cfg.strategy = self.strategy
-            if self.strategy == "beam":
-                decoding_cfg.beam.beam_size = self.beam_size
-                decoding_cfg.beam.len_pen = self.len_pen
-
-        self.model.change_decoding_strategy(decoding_cfg)
-
     def transcribe(self, audio_path: str):
         if self.model is None:
             self.download()
-
-        transcribe_cfg = [{
-            "audio_filepath": audio_path,
-            "duration": None,
-            "taskname": "asr",
-            "source_lang": self.language,
-            "target_lang": self.language,
-            "pnc": "yes",
-            "answer": "predict",
-        }]
-
+        
         result = self.model.transcribe(
-            transcribe_cfg,
+            [audio_path],
+            source_lang=self.language,
+            target_lang=self.language,
             return_hypotheses=self.return_hypotheses
         )
         return result[0]
