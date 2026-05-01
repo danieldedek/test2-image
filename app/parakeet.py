@@ -40,8 +40,6 @@ class Parakeet(BaseASR):
         if self.model is None:
             self.download()
 
-        result = self.model.transcribe([audio_path], return_hypotheses=self.return_hypotheses)
-        if self.return_hypotheses:
-            return result[0].text
-        return result[0]
+        result = self.model.transcribe([audio_path], return_hypotheses=True)
+        return result[0].text
         
