@@ -144,8 +144,10 @@
 
                 <label>Language</label>
                 <select name="language">
-                    <option value="cs" {% if language=="cs" %}selected{% endif %}>Czech</option>
                     <option value="en" {% if language=="en" %}selected{% endif %}>English</option>
+                    <option value="de" {% if language=="de" %}selected{% endif %}>German</option>
+                    <option value="es" {% if language=="es" %}selected{% endif %}>Spanish</option>
+                    <option value="fr" {% if language=="fr" %}selected{% endif %}>French</option>
                 </select>
 
                 <div class="param">
@@ -197,9 +199,9 @@
 
                 <label>Language</label>
                 <select name="whisper_language">
-                    <option value="">Auto</option>
                     <option value="cs" {% if whisper_language=="cs" %}selected{% endif %}>Czech</option>
                     <option value="en" {% if whisper_language=="en" %}selected{% endif %}>English</option>
+                    <option value="zz" {% if whisper_language=="zz" %}selected{% endif %}>broken</option>
                 </select>
 
                 <div class="param">
