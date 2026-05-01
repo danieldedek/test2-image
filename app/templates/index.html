@@ -317,5 +317,19 @@
 
 </div>
 
+<div id="loading-overlay">
+    <div id="loading-spinner"></div>
+    <p>Transcribing, please wait...</p>
+</div>
+
+<script>
+    document.getElementById('main-form').addEventListener('submit', function(e) {
+        const action = document.activeElement.value;
+        if (action === 'use_file') {
+            document.getElementById('loading-overlay').style.display = 'flex';
+        }
+    });
+</script>
+
 </body>
 </html>
