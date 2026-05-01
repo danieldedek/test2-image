@@ -120,9 +120,6 @@ def index():
                     )
 
                     transcript = asr.transcribe(path)
-                    
-                    if return_hypotheses:
-                        transcript = transcript.text
 
                 elif engine == "parakeet":
                     asr = create_asr_engine(
