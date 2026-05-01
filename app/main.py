@@ -77,6 +77,8 @@ def index():
     temperature = get_float("temperature", 0.0)
     best_of = get_int("best_of", 5)
     vad_filter = request.form.get("vad_filter") == "on"
+    model_size = request.form.get("model_size") or "medium"
+    condition_on_previous_text = request.form.get("condition_on_previous_text") == "on"
 
     action = request.form.get("action")
 
@@ -122,20 +124,21 @@ def index():
                         device=device,
                         strategy=strategy,
                         beam_size=beam_size,
-                        alpha=alpha,
-                        beta=beta,
-                        use_fp16=use_fp16
+                        use_fp16=use_fp16,
+                        return_hypotheses=return_hypotheses
                     )
 
                 elif engine == "whisper":
                     asr = create_asr_engine(
                         engine,
+                        model_size=model_size,
                         device=device,
                         beam_size=beam_size,
                         language=whisper_language,
                         temperature=temperature,
                         vad_filter=vad_filter,
-                        best_of=best_of
+                        best_of=best_of,
+                        condition_on_previous_text=condition_on_previous_text
                     )
 
                 transcript = asr.transcribe(path)
@@ -164,13 +167,13 @@ def index():
         len_pen=len_pen,
         language=language,
         return_hypotheses=return_hypotheses,
-        alpha=alpha,
-        beta=beta,
         use_fp16=use_fp16,
         whisper_language=whisper_language,
         temperature=temperature,
         best_of=best_of,
-        vad_filter=vad_filter
+        vad_filter=vad_filter,
+        model_size=model_size,
+        condition_on_previous_text=condition_on_previous_text
     )
 
 
