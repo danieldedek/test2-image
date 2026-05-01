@@ -247,3 +247,37 @@ label {
 .switch input:checked + .slider:before {
     transform: translateX(26px);
 }
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    font-size: 13px;
+}
+
+thead tr {
+    background: #192a56;
+    color: white;
+}
+
+thead th {
+    padding: 8px;
+    text-align: center;
+}
+
+thead th:nth-child(3) {
+    text-align: left;
+}
+
+tbody tr {
+    border-bottom: 1px solid #ddd;
+}
+
+tbody td {
+    padding: 8px;
+    text-align: center;
+}
+
+tbody td:nth-child(3) {
+    text-align: left;
+}
