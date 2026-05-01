@@ -12,7 +12,7 @@ class Canary:
         use_fp16=False,
         return_hypotheses=False
     ):
-        self.model_name = "nvidia/canary-1b"
+        self.model_name = "nvidia/canary-180m"
         self.model = None
         self.device = device
         self.strategy = strategy
