@@ -77,7 +77,8 @@ def index():
     vad_filter = request.form.get("vad_filter") == "on"
     model_size = request.form.get("model_size") or "medium"
     condition_on_previous_text = request.form.get("condition_on_previous_text") == "on"
-    show_segments = request.form.get("show_segments") == "on"
+    show_timestamps = request.form.get("show_timestamps") == "on"
+    show_confidence = request.form.get("show_confidence") == "on"
     
 
     action = request.form.get("action")
@@ -148,7 +149,7 @@ def index():
                         condition_on_previous_text=condition_on_previous_text
                     )
 
-                    if show_segments:
+                    if show_timestamps or show_confidence:
                         segments = asr.transcribe(path, return_segments=True)
                         transcript = " ".join(seg.text for seg in segments)
                         whisper_segments = [
@@ -201,8 +202,9 @@ def index():
         vad_filter=vad_filter,
         model_size=model_size,
         condition_on_previous_text=condition_on_previous_text,
-        whisper_segments=whisper_segments,
-        show_segments=show_segments
+        show_timestamps=show_timestamps,
+        show_confidence=show_confidence,
+        whisper_segments=whisper_segments
     )
 
 
