@@ -50,6 +50,7 @@ def get_wav_files(page, sort, search):
 def index():
     transcript = None
     error = None
+    whisper_segments = []
 
     engine = request.args.get("model", "canary")
 
@@ -70,15 +71,14 @@ def index():
     language = request.form.get("language") or "en"
     return_hypotheses = request.form.get("return_hypotheses") == "on"
 
-    alpha = get_float("alpha", 0.5)
-    beta = get_float("beta", 1.0)
-
     whisper_language = request.form.get("whisper_language") or "en"
     temperature = get_float("temperature", 0.0)
     best_of = get_int("best_of", 5)
     vad_filter = request.form.get("vad_filter") == "on"
     model_size = request.form.get("model_size") or "medium"
     condition_on_previous_text = request.form.get("condition_on_previous_text") == "on"
+    show_segments = request.form.get("show_segments") == "on"
+    
 
     action = request.form.get("action")
 
@@ -118,6 +118,11 @@ def index():
                         use_fp16=use_fp16
                     )
 
+                    transcript = asr.transcribe(path)
+                    
+                    if return_hypotheses:
+                        transcript = transcript.text
+
                 elif engine == "parakeet":
                     asr = create_asr_engine(
                         engine,
@@ -127,6 +132,8 @@ def index():
                         use_fp16=use_fp16,
                         return_hypotheses=return_hypotheses
                     )
+
+                    transcript = asr.transcribe(path)
 
                 elif engine == "whisper":
                     asr = create_asr_engine(
@@ -141,10 +148,30 @@ def index():
                         condition_on_previous_text=condition_on_previous_text
                     )
 
-                transcript = asr.transcribe(path)
-
-                if engine == "canary" and return_hypotheses:
-                    transcript = transcript.text
+                    if show_segments:
+                        segments = asr.transcribe(path, return_segments=True)
+                        transcript = " ".join(seg.text for seg in segments)
+                        whisper_segments = [
+                            {
+                                "start": round(seg.start, 2),
+                                "end": round(seg.end, 2),
+                                "text": seg.text.strip(),
+                                "confidence": round(1 - seg.no_speech_prob, 2),
+                                "words": [
+                                    {
+                                        "word": w.word,
+                                        "start": round(w.start, 2),
+                                        "end": round(w.end, 2),
+                                        "confidence": round(w.probability, 2)
+                                    }
+                                    for w in (seg.words or [])
+                                ]
+                            }
+                            for seg in segments
+                        ]
+                    else:
+                        transcript = asr.transcribe(path)
+                        whisper_segments = []
 
             except Exception as e:
                 error = f"Error: {e}"
@@ -173,7 +200,9 @@ def index():
         best_of=best_of,
         vad_filter=vad_filter,
         model_size=model_size,
-        condition_on_previous_text=condition_on_previous_text
+        condition_on_previous_text=condition_on_previous_text,
+        whisper_segments=whisper_segments,
+        show_segments=show_segments
     )
 
 
