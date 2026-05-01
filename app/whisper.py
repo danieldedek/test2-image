@@ -1,7 +1,9 @@
 from faster_whisper import WhisperModel
 
 
-class Whisper:
+from baseASR import BaseASR
+
+class Whisper(BaseASR):
     def __init__(
         self,
         model_size="medium",
