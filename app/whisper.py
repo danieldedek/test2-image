@@ -34,7 +34,7 @@ class Whisper:
             compute_type=self.compute_type
         )
 
-    def transcribe(self, audio_path: str) -> str:
+    def transcribe(self, audio_path: str, return_segments: bool = False):
         if self.model is None:
             self.download()
 
@@ -45,8 +45,14 @@ class Whisper:
             temperature=self.temperature,
             vad_filter=self.vad_filter,
             condition_on_previous_text=self.condition_on_previous_text,
-            best_of=self.best_of
+            best_of=self.best_of,
+            word_timestamps=True
         )
+
+        segments = list(segments)
+
+        if return_segments:
+            return segments
 
         return " ".join(seg.text for seg in segments)
         
