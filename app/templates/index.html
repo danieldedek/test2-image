@@ -263,29 +263,29 @@
                 <textarea readonly>{{ transcript }}</textarea>
 
                 {% if whisper_segments %}
-                <table style="width:100%; border-collapse:collapse; margin-top:15px; font-size:13px;">
+                <table>
                     <thead>
-                        <tr style="background:#192a56; color:white;">
+                        <tr>
                             {% if show_timestamps %}
-                            <th style="padding:8px;">Start</th>
-                            <th style="padding:8px;">End</th>
+                            <th>Start</th>
+                            <th>End</th>
                             {% endif %}
-                            <th style="padding:8px; text-align:left;">Text</th>
+                            <th>Text</th>
                             {% if show_confidence %}
-                            <th style="padding:8px;">Confidence</th>
+                            <th>Confidence</th>
                             {% endif %}
                         </tr>
                     </thead>
                     <tbody>
                         {% for seg in whisper_segments %}
-                        <tr style="border-bottom:1px solid #ddd;">
+                        <tr>
                             {% if show_timestamps %}
-                            <td style="padding:8px; text-align:center;">{{ seg.start }}s</td>
-                            <td style="padding:8px; text-align:center;">{{ seg.end }}s</td>
+                            <td>{{ seg.start }}s</td>
+                            <td>{{ seg.end }}s</td>
                             {% endif %}
-                            <td style="padding:8px;">{{ seg.text }}</td>
+                            <td>{{ seg.text }}</td>
                             {% if show_confidence %}
-                            <td style="padding:8px; text-align:center;">{{ (seg.confidence * 100)|int }}%</td>
+                            <td>{{ (seg.confidence * 100)|int }}%</td>
                             {% endif %}
                         </tr>
                         {% endfor %}
