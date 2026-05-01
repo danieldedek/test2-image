@@ -238,6 +238,14 @@
                         <span class="slider"></span>
                     </label>
                 </div>
+
+                <div class="param param-inline">
+                    <label>Show timestamps & confidence</label>
+                    <label class="switch">
+                        <input type="checkbox" name="show_segments" {% if show_segments %}checked{% endif %}>
+                        <span class="slider"></span>
+                    </label>
+                </div>
                 {% endif %}
 
             </form>
@@ -245,6 +253,29 @@
             {% if transcript %}
             <div class="card">
                 <textarea readonly>{{ transcript }}</textarea>
+
+                {% if whisper_segments %}
+                <table style="width:100%; border-collapse:collapse; margin-top:15px; font-size:13px;">
+                    <thead>
+                        <tr style="background:#192a56; color:white;">
+                            <th style="padding:8px;">Start</th>
+                            <th style="padding:8px;">End</th>
+                            <th style="padding:8px; text-align:left;">Text</th>
+                            <th style="padding:8px;">Confidence</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for seg in whisper_segments %}
+                        <tr style="border-bottom:1px solid #ddd;">
+                            <td style="padding:8px; text-align:center;">{{ seg.start }}s</td>
+                            <td style="padding:8px; text-align:center;">{{ seg.end }}s</td>
+                            <td style="padding:8px;">{{ seg.text }}</td>
+                            <td style="padding:8px; text-align:center;">{{ (seg.confidence * 100)|int }}%</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% endif %}
 
                 <div class="button-row">
                     <form method="POST" action="{{ url_for('download') }}">
