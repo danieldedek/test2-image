@@ -6,5 +6,5 @@ class BaseASR(ABC):
         pass
 
     @abstractmethod
-    def transcribe(self, audio_path: str):
+    def transcribe(self, audio_path: str, **kwargs):
         pass
