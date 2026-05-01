@@ -67,13 +67,13 @@ def index():
     use_fp16 = request.form.get("fp16") == "on"
 
     len_pen = get_float("len_pen", 1.0)
-    language = request.form.get("language") or "cs"
+    language = request.form.get("language") or "en"
     return_hypotheses = request.form.get("return_hypotheses") == "on"
 
     alpha = get_float("alpha", 0.5)
     beta = get_float("beta", 1.0)
 
-    whisper_language = request.form.get("whisper_language") or None
+    whisper_language = request.form.get("whisper_language") or "en"
     temperature = get_float("temperature", 0.0)
     best_of = get_int("best_of", 5)
     vad_filter = request.form.get("vad_filter") == "on"
