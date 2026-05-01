@@ -2,7 +2,9 @@ import nemo.collections.asr as nemo_asr
 import torch
 
 
-class Parakeet:
+from baseASR import BaseASR
+
+class Parakeet(BaseASR):
     def __init__(
         self,
         device="cpu",
